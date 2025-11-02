@@ -7,10 +7,13 @@ bun.lockb
 
 # Solutions (keep structure, ignore inputs and personal solutions if desired)
 # Uncomment the following to keep only the scaffold:
-# solutions/**/input.txt
-# solutions/**/example*.txt
+solutions/**/input.txt
+solutions/**/example*.txt
 
 # Temp files
 .DONOTCOMMIT/
 *.log
 .DS_Store
+.aoc-last
+
+.claude
