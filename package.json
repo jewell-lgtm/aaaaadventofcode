@@ -1,0 +1,14 @@
+{
+  "name": "aoc",
+  "version": "1.0.0",
+  "type": "module",
+  "bin": {
+    "aoc": "./aoc.ts"
+  },
+  "scripts": {
+    "install-cli": "bun link"
+  },
+  "devDependencies": {
+    "bun-types": "latest"
+  }
+}
