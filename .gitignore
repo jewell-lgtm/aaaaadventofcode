@@ -9,6 +9,7 @@ bun.lockb
 # Uncomment the following to keep only the scaffold:
 solutions/**/input.txt
 solutions/**/example*.txt
+solutions/**/expected*.txt
 
 # Temp files
 .DONOTCOMMIT/

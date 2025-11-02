@@ -10,7 +10,8 @@ interface Args {
   year: number;
   day: number;
   part: number;
-  inputFile: string;
+  inputFile?: string;
+  rawInput?: string;
   expected?: string | number;
 }
 
@@ -19,7 +20,9 @@ interface StoredArgs {
   day?: number;
   part?: number;
   inputFile?: string;
+  rawInput?: string;
   expected?: string | number;
+  lastResult?: string | number;
 }
 
 function parseFlags(args: string[]): Partial<StoredArgs> {
@@ -34,6 +37,8 @@ function parseFlags(args: string[]): Partial<StoredArgs> {
       parsed.part = parseInt(arg.split("=")[1]);
     } else if (arg.startsWith("--input=")) {
       parsed.inputFile = arg.split("=")[1];
+    } else if (arg.startsWith("--raw-input=")) {
+      parsed.rawInput = arg.substring("--raw-input=".length);
     } else if (arg.startsWith("--expected=")) {
       const value = arg.split("=")[1];
       parsed.expected = isNaN(Number(value)) ? value : Number(value);
@@ -56,8 +61,95 @@ async function loadStoredArgs(): Promise<StoredArgs> {
   }
 }
 
+function showHelp(): void {
+  console.log(`
+🎄 Advent of Code Runner
+
+USAGE:
+  aoc --year=<year> --day=<day> --part=<part> --input=<file> [--expected=<value>]
+  aoc --year=<year> --day=<day> --part=<part> --raw-input=<string> [--expected=<value>]
+  aoc                (rerun last command)
+  aoc next           (run next puzzle after last)
+  aoc today          (run today's puzzle)
+  aoc correct        (save last result as expected answer)
+  aoc help           (show this help)
+
+EXAMPLES:
+  aoc --year=2024 --day=1 --part=1 --input=input.txt
+  aoc                # rerun, validates against expected-part1.txt if exists
+  aoc correct        # save last result to expected-part1.txt
+  aoc --year=2024 --day=1 --part=1 --input=example.txt --expected=42
+  aoc --year=2017 --day=1 --part=1 --raw-input=1122 --expected=3
+  aoc --part=2       # rerun with part 2, keeping other params
+  aoc --input=example.txt # switch to example input
+  aoc next           # advance to next part/day
+
+EXPECTED VALUES:
+  File-based (gitignored, auto-created with "aoc correct"):
+    solutions/YYYY/dayDD/expected-part1.txt
+    solutions/YYYY/dayDD/expected-part2.txt
+    solutions/YYYY/dayDD/expected-example-part1.txt
+
+  Files auto-load if present. Use --expected flag for one-off validation.
+  --expected flag only persists on exact reruns (aoc with no args).
+
+FLAGS:
+  --year=YYYY        Year (2015-2025)
+  --day=DD           Day (1-25)
+  --part=P           Part (1 or 2)
+  --input=FILE       Input file (e.g., input.txt, example.txt)
+  --raw-input=STR    Raw input string (instead of file)
+  --expected=VALUE   Expected answer for validation
+`);
+}
+
 async function parseArgs(): Promise<Args | null> {
   const args = process.argv.slice(2);
+
+  // Handle help
+  if (args.length > 0 && (args[0] === "help" || args[0] === "--help" || args[0] === "-h")) {
+    showHelp();
+    return null;
+  }
+
+  // Handle correct command
+  if (args.length > 0 && args[0] === "correct") {
+    const stored = await loadStoredArgs();
+
+    if (!stored.year || !stored.day || !stored.part) {
+      console.error("❌ No previous command found. Run a puzzle first.");
+      return null;
+    }
+
+    if (stored.lastResult === undefined) {
+      console.error("❌ No result from last run. Run a puzzle first.");
+      return null;
+    }
+
+    const dayPadded = stored.day.toString().padStart(2, "0");
+    const dayDir = join(SOLUTIONS_DIR, stored.year.toString(), `day${dayPadded}`);
+
+    // Determine expected filename based on input type
+    let expectedFilename: string;
+    if (stored.rawInput !== undefined) {
+      console.error("❌ Cannot create expected file for raw input. Use --input with a file instead.");
+      return null;
+    } else if (stored.inputFile) {
+      const inputBase = stored.inputFile.replace(/\.txt$/, '');
+      expectedFilename = inputBase === 'input'
+        ? `expected-part${stored.part}.txt`
+        : `expected-${inputBase}-part${stored.part}.txt`;
+    } else {
+      console.error("❌ No input file in last run.");
+      return null;
+    }
+
+    const expectedPath = join(dayDir, expectedFilename);
+    await Bun.write(expectedPath, String(stored.lastResult));
+    console.log(`✅ Created ${expectedPath} with value: ${stored.lastResult}`);
+
+    return null;
+  }
 
   // Handle special commands
   if (args.length > 0 && (args[0] === "next" || args[0] === "today")) {
@@ -78,7 +170,8 @@ async function parseArgs(): Promise<Args | null> {
         year,
         day,
         part: 1,
-        inputFile: "input.txt"
+        inputFile: "input.txt",
+        rawInput: undefined
       };
 
       await Bun.write(LAST_COMMAND_FILE, JSON.stringify(result));
@@ -136,7 +229,8 @@ async function parseArgs(): Promise<Args | null> {
         day: nextDay,
         part: nextPart,
         inputFile: stored.inputFile || "input.txt",
-        expected: stored.expected
+        rawInput: undefined, // Don't carry over raw input to next puzzle
+        expected: undefined // Don't carry over expected to next puzzle
       };
 
       await Bun.write(LAST_COMMAND_FILE, JSON.stringify(result));
@@ -150,17 +244,31 @@ async function parseArgs(): Promise<Args | null> {
   const newFlags = parseFlags(args);
   const merged = { ...stored, ...newFlags };
 
+  // If switching input type, clear the other
+  if (newFlags.inputFile !== undefined) {
+    merged.rawInput = undefined;
+  } else if (newFlags.rawInput !== undefined) {
+    merged.inputFile = undefined;
+  }
+
+  // Only persist expected flag if exact rerun (no new args)
+  // Otherwise rely on file-based expected values
+  if (args.length > 0) {
+    // User provided new flags, clear expected unless explicitly provided
+    if (newFlags.expected === undefined) {
+      merged.expected = undefined;
+    }
+  }
+  // If args.length === 0, keep stored expected for exact rerun
+
   // Check if we have all required values
-  if (!merged.year || !merged.day || !merged.part || !merged.inputFile) {
+  if (!merged.year || !merged.day || !merged.part || (!merged.inputFile && !merged.rawInput)) {
     if (args.length === 0) {
-      console.error("Usage: aoc --year=<year> --day=<day> --part=<part> --input=<file> [--expected=<value>]");
-      console.error("   or: aoc         (rerun last command)");
-      console.error("   or: aoc next    (run next puzzle after last)");
-      console.error("   or: aoc today   (run today's puzzle)");
-      console.error("Example: aoc --year=2024 --day=01 --part=1 --input=input.txt");
+      console.error("❌ No previous command found. Run 'aoc help' for usage.");
     } else {
-      console.error("❌ Missing required parameters. Need: year, day, part, input");
-      console.error(`   Current: year=${merged.year}, day=${merged.day}, part=${merged.part}, input=${merged.inputFile}`);
+      console.error("❌ Missing required parameters. Need: year, day, part, and (input OR raw-input)");
+      console.error(`   Current: year=${merged.year}, day=${merged.day}, part=${merged.part}, input=${merged.inputFile}, raw-input=${merged.rawInput}`);
+      console.error("\nRun 'aoc help' for usage.");
     }
     return null;
   }
@@ -175,6 +283,7 @@ async function parseArgs(): Promise<Args | null> {
     day: merged.day,
     part: merged.part,
     inputFile: merged.inputFile,
+    rawInput: merged.rawInput,
     expected: merged.expected
   };
 
@@ -250,17 +359,35 @@ async function downloadInput(year: number, day: number, targetPath: string): Pro
 }
 
 async function runSolution(args: Args): Promise<void> {
-  const { year, day, part, inputFile, expected } = args;
+  const { year, day, part, inputFile, rawInput } = args;
+  let { expected } = args;
   const dayPadded = day.toString().padStart(2, "0");
   const dayDir = join(SOLUTIONS_DIR, year.toString(), `day${dayPadded}`);
   const solutionPath = join(process.cwd(), dayDir, `part${part}.ts`);
-  const inputPath = join(process.cwd(), dayDir, inputFile);
+  const inputPath = inputFile ? join(process.cwd(), dayDir, inputFile) : null;
 
   // Ensure solution is scaffolded
   await ensureScaffolded(year, day);
 
+  // Load expected value from file if not provided via flag
+  if (expected === undefined && inputFile) {
+    // Derive expected filename from input filename
+    // input.txt -> expected-part1.txt
+    // example.txt -> expected-example-part1.txt
+    // example2.txt -> expected-example2-part1.txt
+    const inputBase = inputFile.replace(/\.txt$/, '');
+    const expectedFilename = inputBase === 'input'
+      ? `expected-part${part}.txt`
+      : `expected-${inputBase}-part${part}.txt`;
+    const expectedPath = join(process.cwd(), dayDir, expectedFilename);
+    if (existsSync(expectedPath)) {
+      const value = (await Bun.file(expectedPath).text()).trim();
+      expected = isNaN(Number(value)) ? value : Number(value);
+    }
+  }
+
   // Check if input file exists, offer to download if not
-  if (!existsSync(inputPath)) {
+  if (inputPath && !existsSync(inputPath)) {
     if (inputFile === "input.txt") {
       console.log(`📥 Input file not found: ${inputPath}`);
       const downloaded = await downloadInput(year, day, inputPath);
@@ -289,11 +416,15 @@ async function runSolution(args: Args): Promise<void> {
   }
 
   // Read input
-  const input = await Bun.file(inputPath).text();
+  const input = rawInput !== undefined ? rawInput : await Bun.file(inputPath!).text();
 
   // Run solution with timing
   console.log(`\n🎄 Running ${year} Day ${day} Part ${part}`);
-  console.log(`📄 Input: ${inputPath}`);
+  if (rawInput !== undefined) {
+    console.log(`📝 Raw input: ${rawInput.length > 50 ? rawInput.substring(0, 50) + '...' : rawInput}`);
+  } else {
+    console.log(`📄 Input: ${inputPath}`);
+  }
 
   const startTime = performance.now();
   const result = solutionModule.solve(input);
@@ -314,12 +445,19 @@ async function runSolution(args: Args): Promise<void> {
       process.exit(1);
     }
   }
+
+  // Store result for "aoc correct" command
+  const storedArgs = await loadStoredArgs();
+  storedArgs.lastResult = result;
+  await Bun.write(LAST_COMMAND_FILE, JSON.stringify(storedArgs));
 }
 
 async function main() {
   const args = await parseArgs();
   if (!args) {
-    process.exit(1);
+    // parseArgs returns null for help or errors
+    // Help has already been displayed, just exit cleanly
+    process.exit(0);
   }
 
   await runSolution(args);
