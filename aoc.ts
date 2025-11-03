@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 
-import { existsSync, mkdirSync } from "fs";
+import { existsSync, mkdirSync, readdirSync } from "fs";
 import { join } from "path";
 
 const SOLUTIONS_DIR = "solutions";
@@ -61,6 +61,108 @@ async function loadStoredArgs(): Promise<StoredArgs> {
   }
 }
 
+interface DayProgress {
+  day: number;
+  part1Solved: boolean;
+  part2Solved: boolean;
+  part1InProgress: boolean;
+  part2InProgress: boolean;
+}
+
+interface YearProgress {
+  year: number;
+  days: DayProgress[];
+  totalStars: number;
+}
+
+async function showProgress(): Promise<void> {
+  if (!existsSync(SOLUTIONS_DIR)) {
+    console.log("📂 No solutions directory found");
+    return;
+  }
+
+  const years = readdirSync(SOLUTIONS_DIR, { withFileTypes: true })
+    .filter(dirent => dirent.isDirectory())
+    .map(dirent => dirent.name)
+    .filter(name => /^\d{4}$/.test(name))
+    .map(name => parseInt(name))
+    .sort((a, b) => b - a); // Sort descending (newest first)
+
+  if (years.length === 0) {
+    console.log("📂 No year directories found");
+    return;
+  }
+
+  const yearProgressList: YearProgress[] = [];
+
+  for (const year of years) {
+    const yearDir = join(SOLUTIONS_DIR, year.toString());
+    const dayDirs = readdirSync(yearDir, { withFileTypes: true })
+      .filter(dirent => dirent.isDirectory())
+      .map(dirent => dirent.name)
+      .filter(name => /^day\d{2}$/.test(name))
+      .sort();
+
+    const days: DayProgress[] = [];
+    let totalStars = 0;
+
+    for (const dayDir of dayDirs) {
+      const dayNum = parseInt(dayDir.replace('day', ''));
+      const dayPath = join(yearDir, dayDir);
+
+      const part1Expected = existsSync(join(dayPath, 'expected-part1.txt'));
+      const part2Expected = existsSync(join(dayPath, 'expected-part2.txt'));
+      const part1Exists = existsSync(join(dayPath, 'part1.ts'));
+      const part2Exists = existsSync(join(dayPath, 'part2.ts'));
+
+      days.push({
+        day: dayNum,
+        part1Solved: part1Expected,
+        part2Solved: part2Expected,
+        part1InProgress: part1Exists && !part1Expected,
+        part2InProgress: part2Exists && !part2Expected,
+      });
+
+      if (part1Expected) totalStars++;
+      if (part2Expected) totalStars++;
+    }
+
+    if (days.length > 0) {
+      yearProgressList.push({ year, days, totalStars });
+    }
+  }
+
+  console.log("\n🎄 Advent of Code Progress\n");
+
+  for (const yearProgress of yearProgressList) {
+    const maxStars = yearProgress.days.length * 2;
+    console.log(`\n📅 ${yearProgress.year}: ${yearProgress.totalStars}/${maxStars} ⭐`);
+    console.log("─".repeat(50));
+
+    for (const day of yearProgress.days) {
+      const dayLabel = `Day ${day.day.toString().padStart(2, ' ')}`;
+      let status = "";
+
+      if (day.part1Solved && day.part2Solved) {
+        status = "⭐⭐";
+      } else if (day.part1Solved) {
+        status = "⭐  ";
+        if (day.part2InProgress) status += " (part 2 in progress)";
+      } else if (day.part1InProgress || day.part2InProgress) {
+        status = "🔨  (in progress)";
+      } else {
+        status = "   ";
+      }
+
+      console.log(`  ${dayLabel}: ${status}`);
+    }
+  }
+
+  const grandTotal = yearProgressList.reduce((sum, y) => sum + y.totalStars, 0);
+  console.log("\n" + "─".repeat(50));
+  console.log(`Total: ${grandTotal} ⭐\n`);
+}
+
 function showHelp(): void {
   console.log(`
 🎄 Advent of Code Runner
@@ -72,6 +174,7 @@ USAGE:
   aoc next           (run next puzzle after last)
   aoc today          (run today's puzzle)
   aoc correct        (save last result as expected answer)
+  aoc progress       (show star progress by year)
   aoc help           (show this help)
 
 EXAMPLES:
@@ -109,6 +212,12 @@ async function parseArgs(): Promise<Args | null> {
   // Handle help
   if (args.length > 0 && (args[0] === "help" || args[0] === "--help" || args[0] === "-h")) {
     showHelp();
+    return null;
+  }
+
+  // Handle progress command
+  if (args.length > 0 && args[0] === "progress") {
+    await showProgress();
     return null;
   }
 
