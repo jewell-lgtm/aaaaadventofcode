@@ -257,6 +257,25 @@ async function parseArgs(): Promise<Args | null> {
     await Bun.write(expectedPath, String(stored.lastResult));
     console.log(`✅ Created ${expectedPath} with value: ${stored.lastResult}`);
 
+    // Git commit and push
+    try {
+      const { spawn } = require("child_process");
+      const execCmd = (cmd: string, args: string[]): Promise<void> => {
+        return new Promise((resolve, reject) => {
+          const proc = spawn(cmd, args, { stdio: 'inherit' });
+          proc.on('close', (code) => code === 0 ? resolve() : reject(new Error(`${cmd} failed with code ${code}`)));
+        });
+      };
+
+      await execCmd("git", ["add", dayDir]);
+      const dayPaddedForCommit = stored.day.toString().padStart(2, "0");
+      await execCmd("git", ["commit", "-m", `${stored.year}: day${dayPaddedForCommit}`]);
+      await execCmd("git", ["push"]);
+      console.log(`✅ Committed and pushed`);
+    } catch (error) {
+      console.error(`⚠️  Git operation failed:`, error);
+    }
+
     return null;
   }
 
