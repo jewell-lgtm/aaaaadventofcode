@@ -10,8 +10,8 @@ export function solve(input: string): number | string {
   const size = biggest(map.keys());
 
   let offset = 0;
-  let getsHit = true;
-  while (getsHit) {
+
+  while (true) {
     let cleanRun = true;
     for (const [layer, range] of map.entries()) {
       if (hit(layer + offset, range)) {
@@ -20,7 +20,6 @@ export function solve(input: string): number | string {
       }
     }
     if (cleanRun) return offset;
-    console.log(offset);
 
     offset++;
   }
