@@ -1,4 +1,4 @@
-export function solve(input: string): number | string {
+export function solve(input: string): string {
   const inputBytes = input
     .trim()
     .split("")
