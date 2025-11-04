@@ -30,15 +30,13 @@ const directions = {
 
 type Direction = keyof typeof directions;
 
-// mutates and returns. fight me.
-function step(pos: Position, dir: string): Position {
+function step(pos: Position, dir: string): void {
   const direction = directions[dir as Direction];
   assert(direction, `Direction ${dir} is invalid`);
   const [q, r, s] = direction;
   pos.q += q;
   pos.r += r;
   pos.s += s;
-  return pos;
 }
 
 function distance(pos: Position) {
