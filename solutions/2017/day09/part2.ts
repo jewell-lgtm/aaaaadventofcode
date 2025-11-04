@@ -1,7 +1,61 @@
 export function solve(input: string): number | string {
-  const lines = input.trim().split('\n');
+  const chars = input.trim().split("");
 
-  // Your solution here
+  const parser = createParser();
 
-  return 0;
+  for (const char of chars) {
+    parser.parse(char);
+  }
+
+  return parser.garbageCount();
+}
+
+function createParser() {
+  let garbage = false;
+  let score = 0;
+  let depth = 0;
+  let ignoreNext = false;
+  let garbageCount = 0;
+
+  return {
+    parse: (char: string) => {
+      if (ignoreNext) {
+        ignoreNext = false;
+        return;
+      }
+      if (char === "!") {
+        ignoreNext = true;
+        return;
+      }
+      if (garbage) {
+        if (char === ">") {
+          garbage = false;
+        } else {
+          garbageCount++;
+        }
+        return;
+      }
+      if (char === "<") {
+        garbage = true;
+        return;
+      }
+      if (char === ",") return;
+      if (char === "{") {
+        depth++;
+        return;
+      }
+      if (char === "}") {
+        score += depth;
+        depth--;
+        return;
+      }
+      throw new Error(`Char ${char} is unrecognized`);
+    },
+    score() {
+      return score;
+    },
+    garbageCount() {
+      return garbageCount;
+    },
+  };
 }
