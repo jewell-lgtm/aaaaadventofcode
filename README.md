@@ -5,18 +5,21 @@ Fast, minimal AoC solution runner built with Bun + TypeScript.
 ## Setup
 
 1. **Install Bun** (managed via asdf):
+
    ```bash
    asdf plugin add bun
    asdf install
    ```
 
 2. **Install CLI**:
+
    ```bash
    bun install
    bun link
    ```
 
 3. **Add your session cookie** (for auto-downloading inputs):
+
    ```bash
    cp .env.example .env
    # Edit .env and add your session cookie from adventofcode.com
@@ -60,7 +63,7 @@ Edit the generated `part1.ts` or `part2.ts` files:
 
 ```typescript
 export function solve(input: string): number | string {
-  const lines = input.trim().split('\n');
+  const lines = input.trim().split("\n");
 
   // Your solution here
 

@@ -82,10 +82,10 @@ async function showProgress(): Promise<void> {
   }
 
   const years = readdirSync(SOLUTIONS_DIR, { withFileTypes: true })
-    .filter(dirent => dirent.isDirectory())
-    .map(dirent => dirent.name)
-    .filter(name => /^\d{4}$/.test(name))
-    .map(name => parseInt(name))
+    .filter((dirent) => dirent.isDirectory())
+    .map((dirent) => dirent.name)
+    .filter((name) => /^\d{4}$/.test(name))
+    .map((name) => parseInt(name))
     .sort((a, b) => b - a); // Sort descending (newest first)
 
   if (years.length === 0) {
@@ -98,22 +98,22 @@ async function showProgress(): Promise<void> {
   for (const year of years) {
     const yearDir = join(SOLUTIONS_DIR, year.toString());
     const dayDirs = readdirSync(yearDir, { withFileTypes: true })
-      .filter(dirent => dirent.isDirectory())
-      .map(dirent => dirent.name)
-      .filter(name => /^day\d{2}$/.test(name))
+      .filter((dirent) => dirent.isDirectory())
+      .map((dirent) => dirent.name)
+      .filter((name) => /^day\d{2}$/.test(name))
       .sort();
 
     const days: DayProgress[] = [];
     let totalStars = 0;
 
     for (const dayDir of dayDirs) {
-      const dayNum = parseInt(dayDir.replace('day', ''));
+      const dayNum = parseInt(dayDir.replace("day", ""));
       const dayPath = join(yearDir, dayDir);
 
-      const part1Expected = existsSync(join(dayPath, 'expected-part1.txt'));
-      const part2Expected = existsSync(join(dayPath, 'expected-part2.txt'));
-      const part1Exists = existsSync(join(dayPath, 'part1.ts'));
-      const part2Exists = existsSync(join(dayPath, 'part2.ts'));
+      const part1Expected = existsSync(join(dayPath, "expected-part1.txt"));
+      const part2Expected = existsSync(join(dayPath, "expected-part2.txt"));
+      const part1Exists = existsSync(join(dayPath, "part1.ts"));
+      const part2Exists = existsSync(join(dayPath, "part2.ts"));
 
       days.push({
         day: dayNum,
@@ -136,11 +136,13 @@ async function showProgress(): Promise<void> {
 
   for (const yearProgress of yearProgressList) {
     const maxStars = yearProgress.days.length * 2;
-    console.log(`\n📅 ${yearProgress.year}: ${yearProgress.totalStars}/${maxStars} ⭐`);
+    console.log(
+      `\n📅 ${yearProgress.year}: ${yearProgress.totalStars}/${maxStars} ⭐`,
+    );
     console.log("─".repeat(50));
 
     for (const day of yearProgress.days) {
-      const dayLabel = `Day ${day.day.toString().padStart(2, ' ')}`;
+      const dayLabel = `Day ${day.day.toString().padStart(2, " ")}`;
       let status = "";
 
       if (day.part1Solved && day.part2Solved) {
@@ -210,7 +212,10 @@ async function parseArgs(): Promise<Args | null> {
   const args = process.argv.slice(2);
 
   // Handle help
-  if (args.length > 0 && (args[0] === "help" || args[0] === "--help" || args[0] === "-h")) {
+  if (
+    args.length > 0 &&
+    (args[0] === "help" || args[0] === "--help" || args[0] === "-h")
+  ) {
     showHelp();
     return null;
   }
@@ -236,18 +241,25 @@ async function parseArgs(): Promise<Args | null> {
     }
 
     const dayPadded = stored.day.toString().padStart(2, "0");
-    const dayDir = join(SOLUTIONS_DIR, stored.year.toString(), `day${dayPadded}`);
+    const dayDir = join(
+      SOLUTIONS_DIR,
+      stored.year.toString(),
+      `day${dayPadded}`,
+    );
 
     // Determine expected filename based on input type
     let expectedFilename: string;
     if (stored.rawInput !== undefined) {
-      console.error("❌ Cannot create expected file for raw input. Use --input with a file instead.");
+      console.error(
+        "❌ Cannot create expected file for raw input. Use --input with a file instead.",
+      );
       return null;
     } else if (stored.inputFile) {
-      const inputBase = stored.inputFile.replace(/\.txt$/, '');
-      expectedFilename = inputBase === 'input'
-        ? `expected-part${stored.part}.txt`
-        : `expected-${inputBase}-part${stored.part}.txt`;
+      const inputBase = stored.inputFile.replace(/\.txt$/, "");
+      expectedFilename =
+        inputBase === "input"
+          ? `expected-part${stored.part}.txt`
+          : `expected-${inputBase}-part${stored.part}.txt`;
     } else {
       console.error("❌ No input file in last run.");
       return null;
@@ -262,14 +274,22 @@ async function parseArgs(): Promise<Args | null> {
       const { spawn } = require("child_process");
       const execCmd = (cmd: string, args: string[]): Promise<void> => {
         return new Promise((resolve, reject) => {
-          const proc = spawn(cmd, args, { stdio: 'inherit' });
-          proc.on('close', (code) => code === 0 ? resolve() : reject(new Error(`${cmd} failed with code ${code}`)));
+          const proc = spawn(cmd, args, { stdio: "inherit" });
+          proc.on("close", (code) =>
+            code === 0
+              ? resolve()
+              : reject(new Error(`${cmd} failed with code ${code}`)),
+          );
         });
       };
 
       await execCmd("git", ["add", dayDir]);
       const dayPaddedForCommit = stored.day.toString().padStart(2, "0");
-      await execCmd("git", ["commit", "-m", `${stored.year}: day${dayPaddedForCommit}`]);
+      await execCmd("git", [
+        "commit",
+        "-m",
+        `${stored.year}: day${dayPaddedForCommit}`,
+      ]);
       await execCmd("git", ["push"]);
       console.log(`✅ Committed and pushed`);
     } catch (error) {
@@ -299,7 +319,7 @@ async function parseArgs(): Promise<Args | null> {
         day,
         part: 1,
         inputFile: "input.txt",
-        rawInput: undefined
+        rawInput: undefined,
       };
 
       await Bun.write(LAST_COMMAND_FILE, JSON.stringify(result));
@@ -333,7 +353,11 @@ async function parseArgs(): Promise<Args | null> {
       // Ask if user wants to copy part1 to part2
       if (isGoingToPart2) {
         const dayPadded = nextDay.toString().padStart(2, "0");
-        const dayDir = join(SOLUTIONS_DIR, nextYear.toString(), `day${dayPadded}`);
+        const dayDir = join(
+          SOLUTIONS_DIR,
+          nextYear.toString(),
+          `day${dayPadded}`,
+        );
         const part1Path = join(dayDir, "part1.ts");
         const part2Path = join(dayDir, "part2.ts");
 
@@ -358,11 +382,13 @@ async function parseArgs(): Promise<Args | null> {
         part: nextPart,
         inputFile: stored.inputFile || "input.txt",
         rawInput: undefined, // Don't carry over raw input to next puzzle
-        expected: undefined // Don't carry over expected to next puzzle
+        expected: undefined, // Don't carry over expected to next puzzle
       };
 
       await Bun.write(LAST_COMMAND_FILE, JSON.stringify(result));
-      console.log(`⏭️  Running next puzzle: ${nextYear} day ${nextDay} part ${nextPart}\n`);
+      console.log(
+        `⏭️  Running next puzzle: ${nextYear} day ${nextDay} part ${nextPart}\n`,
+      );
       return result;
     }
   }
@@ -390,12 +416,21 @@ async function parseArgs(): Promise<Args | null> {
   // If args.length === 0, keep stored expected for exact rerun
 
   // Check if we have all required values
-  if (!merged.year || !merged.day || !merged.part || (!merged.inputFile && !merged.rawInput)) {
+  if (
+    !merged.year ||
+    !merged.day ||
+    !merged.part ||
+    (!merged.inputFile && !merged.rawInput)
+  ) {
     if (args.length === 0) {
       console.error("❌ No previous command found. Run 'aoc help' for usage.");
     } else {
-      console.error("❌ Missing required parameters. Need: year, day, part, and (input OR raw-input)");
-      console.error(`   Current: year=${merged.year}, day=${merged.day}, part=${merged.part}, input=${merged.inputFile}, raw-input=${merged.rawInput}`);
+      console.error(
+        "❌ Missing required parameters. Need: year, day, part, and (input OR raw-input)",
+      );
+      console.error(
+        `   Current: year=${merged.year}, day=${merged.day}, part=${merged.part}, input=${merged.inputFile}, raw-input=${merged.rawInput}`,
+      );
       console.error("\nRun 'aoc help' for usage.");
     }
     return null;
@@ -412,27 +447,35 @@ async function parseArgs(): Promise<Args | null> {
     part: merged.part,
     inputFile: merged.inputFile,
     rawInput: merged.rawInput,
-    expected: merged.expected
+    expected: merged.expected,
   };
 
   // Save merged args for next time
   await Bun.write(LAST_COMMAND_FILE, JSON.stringify(result));
 
   if (args.length === 0) {
-    console.log(`♻️  Rerunning: ${result.year} day ${result.day} part ${result.part}\n`);
+    console.log(
+      `♻️  Rerunning: ${result.year} day ${result.day} part ${result.part}\n`,
+    );
   }
 
   return result;
 }
 
 async function ensureScaffolded(year: number, day: number): Promise<void> {
-  const dayDir = join(SOLUTIONS_DIR, year.toString(), `day${day.toString().padStart(2, "0")}`);
+  const dayDir = join(
+    SOLUTIONS_DIR,
+    year.toString(),
+    `day${day.toString().padStart(2, "0")}`,
+  );
 
   if (existsSync(dayDir)) {
     return; // Already scaffolded
   }
 
-  console.log(`📁 Scaffolding ${year}/day${day.toString().padStart(2, "0")}...`);
+  console.log(
+    `📁 Scaffolding ${year}/day${day.toString().padStart(2, "0")}...`,
+  );
   mkdirSync(dayDir, { recursive: true });
 
   const template = `export function solve(input: string): number | string {
@@ -450,12 +493,18 @@ async function ensureScaffolded(year: number, day: number): Promise<void> {
   console.log(`✅ Created solution templates`);
 }
 
-async function downloadInput(year: number, day: number, targetPath: string): Promise<boolean> {
+async function downloadInput(
+  year: number,
+  day: number,
+  targetPath: string,
+): Promise<boolean> {
   const sessionCookie = process.env.AOC_SESSION;
 
   if (!sessionCookie) {
     console.error("❌ AOC_SESSION not found in environment");
-    console.error("   Get your session cookie from adventofcode.com and add to .env");
+    console.error(
+      "   Get your session cookie from adventofcode.com and add to .env",
+    );
     return false;
   }
 
@@ -468,11 +517,13 @@ async function downloadInput(year: number, day: number, targetPath: string): Pro
         headers: {
           Cookie: `session=${sessionCookie}`,
         },
-      }
+      },
     );
 
     if (!response.ok) {
-      console.error(`❌ Failed to download: ${response.status} ${response.statusText}`);
+      console.error(
+        `❌ Failed to download: ${response.status} ${response.statusText}`,
+      );
       return false;
     }
 
@@ -503,10 +554,11 @@ async function runSolution(args: Args): Promise<void> {
     // input.txt -> expected-part1.txt
     // example.txt -> expected-example-part1.txt
     // example2.txt -> expected-example2-part1.txt
-    const inputBase = inputFile.replace(/\.txt$/, '');
-    const expectedFilename = inputBase === 'input'
-      ? `expected-part${part}.txt`
-      : `expected-${inputBase}-part${part}.txt`;
+    const inputBase = inputFile.replace(/\.txt$/, "");
+    const expectedFilename =
+      inputBase === "input"
+        ? `expected-part${part}.txt`
+        : `expected-${inputBase}-part${part}.txt`;
     const expectedPath = join(process.cwd(), dayDir, expectedFilename);
     if (existsSync(expectedPath)) {
       const value = (await Bun.file(expectedPath).text()).trim();
@@ -520,7 +572,9 @@ async function runSolution(args: Args): Promise<void> {
       console.log(`📥 Input file not found: ${inputPath}`);
       const downloaded = await downloadInput(year, day, inputPath);
       if (!downloaded) {
-        console.error(`💡 You can manually create ${inputPath} with your puzzle input`);
+        console.error(
+          `💡 You can manually create ${inputPath} with your puzzle input`,
+        );
         process.exit(1);
       }
     } else {
@@ -544,12 +598,15 @@ async function runSolution(args: Args): Promise<void> {
   }
 
   // Read input
-  const input = rawInput !== undefined ? rawInput : await Bun.file(inputPath!).text();
+  const input =
+    rawInput !== undefined ? rawInput : await Bun.file(inputPath!).text();
 
   // Run solution with timing
   console.log(`\n🎄 Running ${year} Day ${day} Part ${part}`);
   if (rawInput !== undefined) {
-    console.log(`📝 Raw input: ${rawInput.length > 50 ? rawInput.substring(0, 50) + '...' : rawInput}`);
+    console.log(
+      `📝 Raw input: ${rawInput.length > 50 ? rawInput.substring(0, 50) + "..." : rawInput}`,
+    );
   } else {
     console.log(`📄 Input: ${inputPath}`);
   }
