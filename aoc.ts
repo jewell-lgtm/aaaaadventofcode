@@ -6,10 +6,13 @@ import { join } from "path";
 const SOLUTIONS_DIR = "solutions";
 const LAST_COMMAND_FILE = ".aoc-last";
 
+type Lang = "ts" | "py";
+
 interface Args {
   year: number;
   day: number;
   part: number;
+  lang: Lang;
   inputFile?: string;
   rawInput?: string;
   expected?: string | number;
@@ -19,6 +22,7 @@ interface StoredArgs {
   year?: number;
   day?: number;
   part?: number;
+  lang?: Lang;
   inputFile?: string;
   rawInput?: string;
   expected?: string | number;
@@ -42,6 +46,11 @@ function parseFlags(args: string[]): Partial<StoredArgs> {
     } else if (arg.startsWith("--expected=")) {
       const value = arg.split("=")[1];
       parsed.expected = isNaN(Number(value)) ? value : Number(value);
+    } else if (arg.startsWith("--lang=")) {
+      const value = arg.split("=")[1];
+      if (value === "ts" || value === "py") {
+        parsed.lang = value;
+      }
     }
   }
 
@@ -112,8 +121,8 @@ async function showProgress(): Promise<void> {
 
       const part1Expected = existsSync(join(dayPath, "expected-part1.txt"));
       const part2Expected = existsSync(join(dayPath, "expected-part2.txt"));
-      const part1Exists = existsSync(join(dayPath, "part1.ts"));
-      const part2Exists = existsSync(join(dayPath, "part2.ts"));
+      const part1Exists = existsSync(join(dayPath, "part1.ts")) || existsSync(join(dayPath, "part1.py"));
+      const part2Exists = existsSync(join(dayPath, "part2.ts")) || existsSync(join(dayPath, "part2.py"));
 
       days.push({
         day: dayNum,
@@ -170,8 +179,8 @@ function showHelp(): void {
 🎄 Advent of Code Runner
 
 USAGE:
-  aoc --year=<year> --day=<day> --part=<part> --input=<file> [--expected=<value>]
-  aoc --year=<year> --day=<day> --part=<part> --raw-input=<string> [--expected=<value>]
+  aoc --year=<year> --day=<day> --part=<part> --input=<file> [--lang=ts|py] [--expected=<value>]
+  aoc --year=<year> --day=<day> --part=<part> --raw-input=<string> [--lang=ts|py] [--expected=<value>]
   aoc                (rerun last command)
   aoc next           (run next puzzle after last)
   aoc today          (run today's puzzle)
@@ -202,6 +211,7 @@ FLAGS:
   --year=YYYY        Year (2015-2025)
   --day=DD           Day (1-25)
   --part=P           Part (1 or 2)
+  --lang=LANG        Language: ts (bun) or py (python). Default: ts
   --input=FILE       Input file (e.g., input.txt, example.txt)
   --raw-input=STR    Raw input string (instead of file)
   --expected=VALUE   Expected answer for validation
@@ -314,16 +324,18 @@ async function parseArgs(): Promise<Args | null> {
         return null;
       }
 
+      const stored = await loadStoredArgs();
       const result: Args = {
         year,
         day,
         part: 1,
+        lang: stored.lang || "ts",
         inputFile: "input.txt",
         rawInput: undefined,
       };
 
       await Bun.write(LAST_COMMAND_FILE, JSON.stringify(result));
-      console.log(`📅 Running today's puzzle: ${year} day ${day} part 1\n`);
+      console.log(`📅 Running today's puzzle: ${year} day ${day} part 1 (${result.lang})\n`);
       return result;
     } else if (command === "next") {
       const stored = await loadStoredArgs();
@@ -358,18 +370,19 @@ async function parseArgs(): Promise<Args | null> {
           nextYear.toString(),
           `day${dayPadded}`,
         );
-        const part1Path = join(dayDir, "part1.ts");
-        const part2Path = join(dayDir, "part2.ts");
+        const ext = stored.lang === "py" ? "py" : "ts";
+        const part1Path = join(dayDir, `part1.${ext}`);
+        const part2Path = join(dayDir, `part2.${ext}`);
 
         if (existsSync(part1Path) && existsSync(part2Path)) {
-          process.stdout.write("📋 Copy part1.ts to part2.ts? [y/N]: ");
+          process.stdout.write(`📋 Copy part1.${ext} to part2.${ext}? [y/N]: `);
 
           for await (const line of console) {
             const answer = line.trim().toLowerCase();
             if (answer === "y" || answer === "yes") {
               const part1Content = await Bun.file(part1Path).text();
               await Bun.write(part2Path, part1Content);
-              console.log("✅ Copied part1.ts to part2.ts\n");
+              console.log(`✅ Copied part1.${ext} to part2.${ext}\n`);
             }
             break;
           }
@@ -380,6 +393,7 @@ async function parseArgs(): Promise<Args | null> {
         year: nextYear,
         day: nextDay,
         part: nextPart,
+        lang: stored.lang || "ts",
         inputFile: stored.inputFile || "input.txt",
         rawInput: undefined, // Don't carry over raw input to next puzzle
         expected: undefined, // Don't carry over expected to next puzzle
@@ -387,7 +401,7 @@ async function parseArgs(): Promise<Args | null> {
 
       await Bun.write(LAST_COMMAND_FILE, JSON.stringify(result));
       console.log(
-        `⏭️  Running next puzzle: ${nextYear} day ${nextDay} part ${nextPart}\n`,
+        `⏭️  Running next puzzle: ${nextYear} day ${nextDay} part ${nextPart} (${result.lang})\n`,
       );
       return result;
     }
@@ -445,6 +459,7 @@ async function parseArgs(): Promise<Args | null> {
     year: merged.year,
     day: merged.day,
     part: merged.part,
+    lang: merged.lang || "ts",
     inputFile: merged.inputFile,
     rawInput: merged.rawInput,
     expected: merged.expected,
@@ -462,23 +477,28 @@ async function parseArgs(): Promise<Args | null> {
   return result;
 }
 
-async function ensureScaffolded(year: number, day: number): Promise<void> {
+async function ensureScaffolded(year: number, day: number, lang: Lang): Promise<void> {
   const dayDir = join(
     SOLUTIONS_DIR,
     year.toString(),
     `day${day.toString().padStart(2, "0")}`,
   );
 
-  if (existsSync(dayDir)) {
-    return; // Already scaffolded
+  const ext = lang === "ts" ? "ts" : "py";
+  const part1Path = join(dayDir, `part1.${ext}`);
+  const part2Path = join(dayDir, `part2.${ext}`);
+
+  if (existsSync(part1Path) && existsSync(part2Path)) {
+    return; // Already scaffolded for this language
   }
 
   console.log(
-    `📁 Scaffolding ${year}/day${day.toString().padStart(2, "0")}...`,
+    `📁 Scaffolding ${year}/day${day.toString().padStart(2, "0")} (${lang})...`,
   );
   mkdirSync(dayDir, { recursive: true });
 
-  const template = `export function solve(input: string): number | string {
+  if (lang === "ts") {
+    const template = `export function solve(input: string): number | string {
   const lines = input.trim().split('\\n');
 
   // Your solution here
@@ -486,9 +506,19 @@ async function ensureScaffolded(year: number, day: number): Promise<void> {
   return 0;
 }
 `;
+    if (!existsSync(part1Path)) await Bun.write(part1Path, template);
+    if (!existsSync(part2Path)) await Bun.write(part2Path, template);
+  } else {
+    const template = `def solve(input: str) -> int | str:
+    lines = input.strip().split('\\n')
 
-  await Bun.write(join(dayDir, "part1.ts"), template);
-  await Bun.write(join(dayDir, "part2.ts"), template);
+    # Your solution here
+
+    return 0
+`;
+    if (!existsSync(part1Path)) await Bun.write(part1Path, template);
+    if (!existsSync(part2Path)) await Bun.write(part2Path, template);
+  }
 
   console.log(`✅ Created solution templates`);
 }
@@ -538,15 +568,16 @@ async function downloadInput(
 }
 
 async function runSolution(args: Args): Promise<void> {
-  const { year, day, part, inputFile, rawInput } = args;
+  const { year, day, part, lang, inputFile, rawInput } = args;
   let { expected } = args;
   const dayPadded = day.toString().padStart(2, "0");
   const dayDir = join(SOLUTIONS_DIR, year.toString(), `day${dayPadded}`);
-  const solutionPath = join(process.cwd(), dayDir, `part${part}.ts`);
+  const ext = lang === "ts" ? "ts" : "py";
+  const solutionPath = join(process.cwd(), dayDir, `part${part}.${ext}`);
   const inputPath = inputFile ? join(process.cwd(), dayDir, inputFile) : null;
 
   // Ensure solution is scaffolded
-  await ensureScaffolded(year, day);
+  await ensureScaffolded(year, day, lang);
 
   // Load expected value from file if not provided via flag
   if (expected === undefined && inputFile) {
@@ -583,26 +614,12 @@ async function runSolution(args: Args): Promise<void> {
     }
   }
 
-  // Load solution module
-  let solutionModule;
-  try {
-    solutionModule = await import(solutionPath);
-  } catch (error) {
-    console.error(`❌ Failed to load solution from ${solutionPath}:`, error);
-    process.exit(1);
-  }
-
-  if (typeof solutionModule.solve !== "function") {
-    console.error(`❌ Solution must export a 'solve' function`);
-    process.exit(1);
-  }
-
   // Read input
   const input =
     rawInput !== undefined ? rawInput : await Bun.file(inputPath!).text();
 
   // Run solution with timing
-  console.log(`\n🎄 Running ${year} Day ${day} Part ${part}`);
+  console.log(`\n🎄 Running ${year} Day ${day} Part ${part} (${lang})`);
   if (rawInput !== undefined) {
     console.log(
       `📝 Raw input: ${rawInput.length > 50 ? rawInput.substring(0, 50) + "..." : rawInput}`,
@@ -611,8 +628,54 @@ async function runSolution(args: Args): Promise<void> {
     console.log(`📄 Input: ${inputPath}`);
   }
 
+  let result: string | number;
   const startTime = performance.now();
-  const result = solutionModule.solve(input);
+
+  if (lang === "ts") {
+    // Load TypeScript module
+    let solutionModule;
+    try {
+      solutionModule = await import(solutionPath);
+    } catch (error) {
+      console.error(`❌ Failed to load solution from ${solutionPath}:`, error);
+      process.exit(1);
+    }
+
+    if (typeof solutionModule.solve !== "function") {
+      console.error(`❌ Solution must export a 'solve' function`);
+      process.exit(1);
+    }
+
+    result = solutionModule.solve(input);
+  } else {
+    // Run Python solution
+    const { spawnSync } = require("child_process");
+    const pythonRunner = `
+import sys
+sys.path.insert(0, '${join(process.cwd(), dayDir)}')
+from part${part} import solve
+print(solve(sys.stdin.read()))
+`;
+    const proc = spawnSync("python", ["-c", pythonRunner], {
+      input,
+      encoding: "utf-8",
+      cwd: join(process.cwd(), dayDir),
+    });
+
+    if (proc.error) {
+      console.error(`❌ Failed to run Python:`, proc.error);
+      process.exit(1);
+    }
+
+    if (proc.status !== 0) {
+      console.error(`❌ Python error:\n${proc.stderr}`);
+      process.exit(1);
+    }
+
+    const output = proc.stdout.trim();
+    result = isNaN(Number(output)) ? output : Number(output);
+  }
+
   const endTime = performance.now();
   const duration = (endTime - startTime).toFixed(2);
 
