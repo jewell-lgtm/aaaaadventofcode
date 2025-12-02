@@ -11,6 +11,7 @@ export function solve(input: string): number | string {
       const string = num.toString();
       for (let len = 1; len <= Math.floor(string.length / 2); len++) {
         const header = string.slice(0, len);
+        if (string.length % len !== 0) continue;
         let i = len;
         let valid = true;
         while (i < string.length) {
@@ -28,7 +29,6 @@ export function solve(input: string): number | string {
     }
   }
 
-  console.log("seen", seen);
   return sum(seen);
 }
 
