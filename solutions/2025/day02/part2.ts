@@ -1,15 +1,12 @@
 export function solve(input: string): number | string {
-  const nums = input
+  const ranges = input
     .trim()
     .split("\n")
     .flatMap((line) => line.split(","))
-    .map((r) => parseRange(r))
-    .flatMap(([start, end]) =>
-      Array.from({ length: end - start + 1 }, (_, i) => start + i),
-    );
+    .map((r) => parseRange(r));
 
   let seen = new Set<number>();
-  for (const num of nums) {
+  for (const num of allNums(ranges)) {
     const string = num.toString();
     for (let len = 1; len <= Math.floor(string.length / 2); len++) {
       if (string.length % len !== 0) continue;
@@ -30,6 +27,18 @@ export function solve(input: string): number | string {
   }
 
   return sum(seen);
+}
+
+function* rangeGen(start: number, end: number): Generator<number> {
+  for (let i = start; i <= end; i++) {
+    yield i;
+  }
+}
+
+function* allNums(ranges: [number, number][]): Generator<number> {
+  for (const [start, end] of ranges) {
+    yield* rangeGen(start, end);
+  }
 }
 
 function parseRange(range: string) {
