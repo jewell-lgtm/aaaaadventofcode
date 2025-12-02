@@ -1,30 +1,30 @@
 export function solve(input: string): number | string {
-  const ranges = input
+  const nums = input
     .trim()
     .split("\n")
     .flatMap((line) => line.split(","))
-    .map((r) => parseRange(r));
+    .map((r) => parseRange(r))
+    .flatMap(([start, end]) =>
+      Array.from({ length: end - start + 1 }, (_, i) => start + i),
+    );
 
   let seen = new Set<number>();
-  for (const [first, last] of ranges) {
-    for (let num = first; num <= last; num++) {
-      const string = num.toString();
-      for (let len = 1; len <= Math.floor(string.length / 2); len++) {
-        const header = string.slice(0, len);
-        if (string.length % len !== 0) continue;
-        let i = len;
-        let valid = true;
-        while (i < string.length) {
-          if (string.slice(i, i + len) === header) {
-            i += len;
-          } else {
-            valid = false;
-            break;
-          }
+  for (const num of nums) {
+    const string = num.toString();
+    for (let len = 1; len <= Math.floor(string.length / 2); len++) {
+      if (string.length % len !== 0) continue;
+      const header = string.slice(0, len);
+      let i = len;
+      let valid = true;
+      while (i < string.length) {
+        if (string.slice(i, i + len) !== header) {
+          valid = false;
+          break;
         }
-        if (valid) {
-          seen.add(num);
-        }
+        i += len;
+      }
+      if (valid) {
+        seen.add(num);
       }
     }
   }
