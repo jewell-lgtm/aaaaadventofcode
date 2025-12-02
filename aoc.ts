@@ -6,7 +6,7 @@ import { join } from "path";
 const SOLUTIONS_DIR = "solutions";
 const LAST_COMMAND_FILE = ".aoc-last";
 
-type Lang = "ts" | "py";
+type Lang = "ts" | "py" | "hs";
 
 interface Args {
   year: number;
@@ -48,7 +48,7 @@ function parseFlags(args: string[]): Partial<StoredArgs> {
       parsed.expected = isNaN(Number(value)) ? value : Number(value);
     } else if (arg.startsWith("--lang=")) {
       const value = arg.split("=")[1];
-      if (value === "ts" || value === "py") {
+      if (value === "ts" || value === "py" || value === "hs") {
         parsed.lang = value;
       }
     }
@@ -121,8 +121,14 @@ async function showProgress(): Promise<void> {
 
       const part1Expected = existsSync(join(dayPath, "expected-part1.txt"));
       const part2Expected = existsSync(join(dayPath, "expected-part2.txt"));
-      const part1Exists = existsSync(join(dayPath, "part1.ts")) || existsSync(join(dayPath, "part1.py"));
-      const part2Exists = existsSync(join(dayPath, "part2.ts")) || existsSync(join(dayPath, "part2.py"));
+      const part1Exists =
+        existsSync(join(dayPath, "part1.ts")) ||
+        existsSync(join(dayPath, "part1.py")) ||
+        existsSync(join(dayPath, "Part1.hs"));
+      const part2Exists =
+        existsSync(join(dayPath, "part2.ts")) ||
+        existsSync(join(dayPath, "part2.py")) ||
+        existsSync(join(dayPath, "Part2.hs"));
 
       days.push({
         day: dayNum,
@@ -179,8 +185,8 @@ function showHelp(): void {
 🎄 Advent of Code Runner
 
 USAGE:
-  aoc --year=<year> --day=<day> --part=<part> --input=<file> [--lang=ts|py] [--expected=<value>]
-  aoc --year=<year> --day=<day> --part=<part> --raw-input=<string> [--lang=ts|py] [--expected=<value>]
+  aoc --year=<year> --day=<day> --part=<part> --input=<file> [--lang=ts|py|hs] [--expected=<value>]
+  aoc --year=<year> --day=<day> --part=<part> --raw-input=<string> [--lang=ts|py|hs] [--expected=<value>]
   aoc                (rerun last command)
   aoc next           (run next puzzle after last)
   aoc today          (run today's puzzle)
@@ -211,7 +217,7 @@ FLAGS:
   --year=YYYY        Year (2015-2025)
   --day=DD           Day (1-25)
   --part=P           Part (1 or 2)
-  --lang=LANG        Language: ts (bun) or py (python). Default: ts
+  --lang=LANG        Language: ts (bun), py (python), hs (haskell). Default: ts
   --input=FILE       Input file (e.g., input.txt, example.txt)
   --raw-input=STR    Raw input string (instead of file)
   --expected=VALUE   Expected answer for validation
@@ -335,7 +341,9 @@ async function parseArgs(): Promise<Args | null> {
       };
 
       await Bun.write(LAST_COMMAND_FILE, JSON.stringify(result));
-      console.log(`📅 Running today's puzzle: ${year} day ${day} part 1 (${result.lang})\n`);
+      console.log(
+        `📅 Running today's puzzle: ${year} day ${day} part 1 (${result.lang})\n`,
+      );
       return result;
     } else if (command === "next") {
       const stored = await loadStoredArgs();
@@ -370,19 +378,26 @@ async function parseArgs(): Promise<Args | null> {
           nextYear.toString(),
           `day${dayPadded}`,
         );
-        const ext = stored.lang === "py" ? "py" : "ts";
-        const part1Path = join(dayDir, `part1.${ext}`);
-        const part2Path = join(dayDir, `part2.${ext}`);
+        const ext =
+          stored.lang === "py" ? "py" : stored.lang === "hs" ? "hs" : "ts";
+        const part1Name = stored.lang === "hs" ? "Part1" : "part1";
+        const part2Name = stored.lang === "hs" ? "Part2" : "part2";
+        const part1Path = join(dayDir, `${part1Name}.${ext}`);
+        const part2Path = join(dayDir, `${part2Name}.${ext}`);
 
         if (existsSync(part1Path) && existsSync(part2Path)) {
-          process.stdout.write(`📋 Copy part1.${ext} to part2.${ext}? [y/N]: `);
+          process.stdout.write(
+            `📋 Copy ${part1Name}.${ext} to ${part2Name}.${ext}? [y/N]: `,
+          );
 
           for await (const line of console) {
             const answer = line.trim().toLowerCase();
             if (answer === "y" || answer === "yes") {
               const part1Content = await Bun.file(part1Path).text();
               await Bun.write(part2Path, part1Content);
-              console.log(`✅ Copied part1.${ext} to part2.${ext}\n`);
+              console.log(
+                `✅ Copied ${part1Name}.${ext} to ${part2Name}.${ext}\n`,
+              );
             }
             break;
           }
@@ -477,16 +492,22 @@ async function parseArgs(): Promise<Args | null> {
   return result;
 }
 
-async function ensureScaffolded(year: number, day: number, lang: Lang): Promise<void> {
+async function ensureScaffolded(
+  year: number,
+  day: number,
+  lang: Lang,
+): Promise<void> {
   const dayDir = join(
     SOLUTIONS_DIR,
     year.toString(),
     `day${day.toString().padStart(2, "0")}`,
   );
 
-  const ext = lang === "ts" ? "ts" : "py";
-  const part1Path = join(dayDir, `part1.${ext}`);
-  const part2Path = join(dayDir, `part2.${ext}`);
+  const ext = lang === "hs" ? "hs" : lang === "py" ? "py" : "ts";
+  const part1Name = lang === "hs" ? "Part1" : "part1";
+  const part2Name = lang === "hs" ? "Part2" : "part2";
+  const part1Path = join(dayDir, `${part1Name}.${ext}`);
+  const part2Path = join(dayDir, `${part2Name}.${ext}`);
 
   if (existsSync(part1Path) && existsSync(part2Path)) {
     return; // Already scaffolded for this language
@@ -508,7 +529,7 @@ async function ensureScaffolded(year: number, day: number, lang: Lang): Promise<
 `;
     if (!existsSync(part1Path)) await Bun.write(part1Path, template);
     if (!existsSync(part2Path)) await Bun.write(part2Path, template);
-  } else {
+  } else if (lang === "py") {
     const template = `def solve(input: str) -> int | str:
     lines = input.strip().split('\\n')
 
@@ -518,6 +539,17 @@ async function ensureScaffolded(year: number, day: number, lang: Lang): Promise<
 `;
     if (!existsSync(part1Path)) await Bun.write(part1Path, template);
     if (!existsSync(part2Path)) await Bun.write(part2Path, template);
+  } else if (lang === "hs") {
+    const template = (mod: string) => `module ${mod} (solve) where
+
+solve :: String -> String
+solve input = show result
+  where
+    ls = lines input
+    result = 0 :: Int
+`;
+    if (!existsSync(part1Path)) await Bun.write(part1Path, template("Part1"));
+    if (!existsSync(part2Path)) await Bun.write(part2Path, template("Part2"));
   }
 
   console.log(`✅ Created solution templates`);
@@ -572,8 +604,9 @@ async function runSolution(args: Args): Promise<void> {
   let { expected } = args;
   const dayPadded = day.toString().padStart(2, "0");
   const dayDir = join(SOLUTIONS_DIR, year.toString(), `day${dayPadded}`);
-  const ext = lang === "ts" ? "ts" : "py";
-  const solutionPath = join(process.cwd(), dayDir, `part${part}.${ext}`);
+  const ext = lang === "hs" ? "hs" : lang === "py" ? "py" : "ts";
+  const partName = lang === "hs" ? `Part${part}` : `part${part}`;
+  const solutionPath = join(process.cwd(), dayDir, `${partName}.${ext}`);
   const inputPath = inputFile ? join(process.cwd(), dayDir, inputFile) : null;
 
   // Ensure solution is scaffolded
@@ -647,7 +680,7 @@ async function runSolution(args: Args): Promise<void> {
     }
 
     result = solutionModule.solve(input);
-  } else {
+  } else if (lang === "py") {
     // Run Python solution
     const { spawnSync } = require("child_process");
     const pythonRunner = `
@@ -669,6 +702,34 @@ print(solve(sys.stdin.read()))
 
     if (proc.status !== 0) {
       console.error(`❌ Python error:\n${proc.stderr}`);
+      process.exit(1);
+    }
+
+    const output = proc.stdout.trim();
+    result = isNaN(Number(output)) ? output : Number(output);
+  } else {
+    // Run Haskell solution
+    const { spawnSync } = require("child_process");
+    const haskellRunner = `
+import Part${part} (solve)
+main = interact solve
+`;
+    const runnerPath = join(process.cwd(), dayDir, "Runner.hs");
+    await Bun.write(runnerPath, haskellRunner);
+
+    const proc = spawnSync("runhaskell", ["Runner.hs"], {
+      input,
+      encoding: "utf-8",
+      cwd: join(process.cwd(), dayDir),
+    });
+
+    if (proc.error) {
+      console.error(`❌ Failed to run Haskell:`, proc.error);
+      process.exit(1);
+    }
+
+    if (proc.status !== 0) {
+      console.error(`❌ Haskell error:\n${proc.stderr}`);
       process.exit(1);
     }
 
