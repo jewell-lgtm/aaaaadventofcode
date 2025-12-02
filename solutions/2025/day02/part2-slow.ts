@@ -1,3 +1,5 @@
+import assert from "assert";
+
 export function solve(input: string): number | string {
   const nums = input
     .trim()
@@ -13,19 +15,10 @@ export function solve(input: string): number | string {
     const string = num.toString();
     for (let len = 1; len <= Math.floor(string.length / 2); len++) {
       if (string.length % len !== 0) continue;
-      const header = string.slice(0, len);
-      let i = len;
-      let valid = true;
-      while (i < string.length) {
-        if (string.slice(i, i + len) !== header) {
-          valid = false;
-          break;
-        }
-        i += len;
-      }
-      if (valid) {
-        seen.add(num);
-      }
+      const [head, ...rest] = chunk(string, len);
+      if (rest.some((it) => it !== head)) continue;
+
+      seen.add(num);
     }
   }
 
@@ -34,6 +27,20 @@ export function solve(input: string): number | string {
 
 function parseRange(range: string) {
   return range.split("-").map((it) => parseInt(it)) as [number, number];
+}
+
+function chunk(str: string, size: number): string[] {
+  assert(size > 0, "Size must be greater than 0");
+  assert(str.length % size === 0, "String length must be multiple of size");
+  let tail = str;
+  const result: string[] = [];
+  let i = 0;
+  while (tail.length) {
+    const head = tail.slice(0, size);
+    tail = tail.slice(size);
+    result.push(head);
+  }
+  return result;
 }
 
 function sum(arr: number[] | Set<number>) {
