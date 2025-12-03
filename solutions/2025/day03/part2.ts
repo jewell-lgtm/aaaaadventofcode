@@ -14,11 +14,8 @@ export function solve(input: string): number | string {
     }
     let biggest = collect(positions);
     for (let posI = 0; posI < positions.length; posI++) {
-      const min = posI === 0 ? 0 : positions[posI - 1] + 1;
-      const max =
-        posI === positions.length - 1
-          ? line.length - 1
-          : positions[posI + 1] - 1;
+      const min = positions[posI - 1] + 1 || 0;
+      const max = positions[posI];
       // move the digit to the left, and slide to the right to see if we can improve it
       positions[posI] = min;
       biggest = collect(positions);

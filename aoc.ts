@@ -16,6 +16,7 @@ interface Args {
   inputFile?: string;
   rawInput?: string;
   expected?: string | number;
+  solution?: string;
 }
 
 interface StoredArgs {
@@ -27,6 +28,7 @@ interface StoredArgs {
   rawInput?: string;
   expected?: string | number;
   lastResult?: string | number;
+  solution?: string;
 }
 
 function parseFlags(args: string[]): Partial<StoredArgs> {
@@ -51,6 +53,8 @@ function parseFlags(args: string[]): Partial<StoredArgs> {
       if (value === "ts" || value === "py" || value === "hs") {
         parsed.lang = value;
       }
+    } else if (arg.startsWith("--solution=")) {
+      parsed.solution = arg.split("=")[1];
     }
   }
 
@@ -221,6 +225,7 @@ FLAGS:
   --input=FILE       Input file (e.g., input.txt, example.txt)
   --raw-input=STR    Raw input string (instead of file)
   --expected=VALUE   Expected answer for validation
+  --solution=NAME    Solution file name without ext (e.g., part2-linear)
 `);
 }
 
@@ -478,6 +483,7 @@ async function parseArgs(): Promise<Args | null> {
     inputFile: merged.inputFile,
     rawInput: merged.rawInput,
     expected: merged.expected,
+    solution: merged.solution,
   };
 
   // Save merged args for next time
@@ -600,12 +606,12 @@ async function downloadInput(
 }
 
 async function runSolution(args: Args): Promise<void> {
-  const { year, day, part, lang, inputFile, rawInput } = args;
+  const { year, day, part, lang, inputFile, rawInput, solution } = args;
   let { expected } = args;
   const dayPadded = day.toString().padStart(2, "0");
   const dayDir = join(SOLUTIONS_DIR, year.toString(), `day${dayPadded}`);
   const ext = lang === "hs" ? "hs" : lang === "py" ? "py" : "ts";
-  const partName = lang === "hs" ? `Part${part}` : `part${part}`;
+  const partName = solution || (lang === "hs" ? `Part${part}` : `part${part}`);
   const solutionPath = join(process.cwd(), dayDir, `${partName}.${ext}`);
   const inputPath = inputFile ? join(process.cwd(), dayDir, inputFile) : null;
 
@@ -652,7 +658,8 @@ async function runSolution(args: Args): Promise<void> {
     rawInput !== undefined ? rawInput : await Bun.file(inputPath!).text();
 
   // Run solution with timing
-  console.log(`\n🎄 Running ${year} Day ${day} Part ${part} (${lang})`);
+  const solutionLabel = solution ? `${solution}` : `Part ${part}`;
+  console.log(`\n🎄 Running ${year} Day ${day} ${solutionLabel} (${lang})`);
   if (rawInput !== undefined) {
     console.log(
       `📝 Raw input: ${rawInput.length > 50 ? rawInput.substring(0, 50) + "..." : rawInput}`,
@@ -683,10 +690,11 @@ async function runSolution(args: Args): Promise<void> {
   } else if (lang === "py") {
     // Run Python solution
     const { spawnSync } = require("child_process");
+    const pyModule = partName.replace(/-/g, "_");
     const pythonRunner = `
 import sys
 sys.path.insert(0, '${join(process.cwd(), dayDir)}')
-from part${part} import solve
+from ${pyModule} import solve
 print(solve(sys.stdin.read()))
 `;
     const proc = spawnSync("python", ["-c", pythonRunner], {
@@ -710,8 +718,9 @@ print(solve(sys.stdin.read()))
   } else {
     // Run Haskell solution
     const { spawnSync } = require("child_process");
+    const hsModule = partName.charAt(0).toUpperCase() + partName.slice(1);
     const haskellRunner = `
-import Part${part} (solve)
+import ${hsModule} (solve)
 main = interact solve
 `;
     const runnerPath = join(process.cwd(), dayDir, "Runner.hs");
