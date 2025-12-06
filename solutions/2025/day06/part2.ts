@@ -20,8 +20,6 @@ export function solve(input: string): number | string {
         } else if (grid[j][i] === "*") {
           result += sum.reduce((a, b) => a * b, 1n);
           sum.length = 0;
-        } else {
-          nums.length = 0;
         }
       }
       nums.push(grid[j][i]);
