@@ -1,110 +1,82 @@
-# 🎄 Advent of Code Starter
+# Advent of Code Runner
 
-Fast, minimal AoC solution runner built with Bun + TypeScript.
+Bun + TypeScript/Python/Haskell AoC runner with smart defaults.
 
 ## Setup
 
-1. **Install Bun** (managed via asdf):
-
-   ```bash
-   asdf plugin add bun
-   asdf install
-   ```
-
-2. **Install CLI**:
-
-   ```bash
-   bun install
-   bun link
-   ```
-
-3. **Add your session cookie** (for auto-downloading inputs):
-
-   ```bash
-   cp .env.example .env
-   # Edit .env and add your session cookie from adventofcode.com
-   ```
-
-   To get your session cookie:
-   - Log in to [adventofcode.com](https://adventofcode.com)
-   - Open browser dev tools (F12)
-   - Go to Application/Storage > Cookies
-   - Copy the value of the `session` cookie
+```bash
+asdf plugin add bun && asdf install
+bun install && bun link
+cp .env.example .env  # add AOC_SESSION cookie
+```
 
 ## Usage
 
 ```bash
-aoc <year> <day> <part> <input_file> [--expected=<value>]
+aoc --year=2025 --day=1 --part=1 --input=input.txt
+aoc                    # rerun last command
+aoc --part=2           # switch to part 2, keep other params
+aoc --input=example.txt # switch input file
+aoc next               # advance to next part/day
+aoc today              # run today's puzzle (Dec 1-25)
+aoc correct            # save last result as expected, commit+push
+aoc progress           # show star progress
+aoc help               # full help
 ```
 
-### Examples
+## Flags
 
-```bash
-# Run 2025 day 1 part 1 with input.txt
-aoc 2025 01 1 input.txt
-
-# Run with expected result validation
-aoc 2025 01 1 input.txt --expected=301
-
-# Use a different input file (e.g., example from puzzle)
-aoc 2025 01 1 example.txt --expected=7
+```
+--year=YYYY      Year (2015-2025)
+--day=DD         Day (1-25)
+--part=P         Part (1 or 2)
+--lang=LANG      ts (default), py, hs
+--input=FILE     Input file (input.txt, example.txt, etc.)
+--raw-input=STR  Raw input string instead of file
+--expected=VAL   Expected answer for validation
+--solution=NAME  Alt solution file (e.g., part2-linear)
 ```
 
-### What happens
+## Expected Values
 
-1. **Auto-scaffold**: Creates `solutions/YEAR/dayDD/part1.ts` and `part2.ts` if they don't exist
-2. **Auto-download**: Downloads `input.txt` from adventofcode.com if missing (requires session cookie)
-3. **Run**: Executes your solution and shows the result with timing
-4. **Validate**: Checks result against `--expected` value if provided
+Auto-loaded from files if present (gitignored):
+- `expected-part1.txt` / `expected-part2.txt` for input.txt
+- `expected-example-part1.txt` for example.txt
+
+Create with `aoc correct` after successful run.
 
 ## Writing Solutions
 
-Edit the generated `part1.ts` or `part2.ts` files:
-
+**TypeScript** (`part1.ts`):
 ```typescript
 export function solve(input: string): number | string {
-  const lines = input.trim().split("\n");
-
-  // Your solution here
-
+  const lines = input.trim().split('\n');
   return 0;
 }
 ```
 
-- Input is provided as a string
-- Return a number or string
-- That's it!
+**Python** (`part1.py`):
+```python
+def solve(input: str) -> int | str:
+    lines = input.strip().split('\n')
+    return 0
+```
+
+**Haskell** (`Part1.hs`):
+```haskell
+module Part1 (solve) where
+solve :: String -> String
+solve input = show $ length (lines input)
+```
 
 ## Project Structure
 
 ```
 solutions/
-  2024/
-    day01/
-      part1.ts      # Your part 1 solution
-      part2.ts      # Your part 2 solution
-      input.txt     # Puzzle input (auto-downloaded)
-      example.txt   # Optional example input (manual)
-    day02/
-      ...
   2025/
     day01/
-      ...
+      part1.ts           # solution
+      part2.ts
+      input.txt          # auto-downloaded
+      expected-part1.txt # created by `aoc correct`
 ```
-
-## Tips
-
-- Run with example input first: `aoc 2025 01 1 example.txt --expected=7`
-- Once working, run with real input: `aoc 2025 01 1 input.txt`
-- Solutions are just TypeScript - use any Bun/Node APIs you want
-- Fast reload - no build step needed
-
-## Why Bun?
-
-- ⚡ Instant startup (no build step)
-- 🎯 TypeScript support out of the box
-- 🔥 Fast execution
-- 🎄 Fun to use
-- 📦 Single executable
-
-Happy coding! 🎅

@@ -6,9 +6,7 @@ export function solve(input: string): number | string {
       .map((it) => it.split("\n"))[0],
   );
 
-
   const rangeSet = OverlappingRanges.fromRanges(ranges);
-
 
   let result = BigInt(0);
 
@@ -48,8 +46,8 @@ class OverlappingRanges {
         if (
           contains(this.ranges[i], this.ranges[j][0]) ||
           contains(this.ranges[i], this.ranges[j][1]) ||
-            contains(this.ranges[j], this.ranges[i][0]) ||
-            contains(this.ranges[j], this.ranges[i][1])
+          contains(this.ranges[j], this.ranges[i][0]) ||
+          contains(this.ranges[j], this.ranges[i][1])
         ) {
           this.ranges[i] = combine(this.ranges[i], this.ranges[j]);
           this.removeAt(j);
