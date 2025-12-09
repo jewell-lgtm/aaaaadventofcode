@@ -1,3 +1,3 @@
 
-import Part1 (solve)
+import Part2 (solve)
 main = interact solve
