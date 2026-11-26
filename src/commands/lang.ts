@@ -2,21 +2,19 @@ import type { Args } from "../args";
 import { getLang, langs } from "../langs";
 import { pruneContainers } from "../runner";
 import { scaffold } from "../scaffold";
+import { pickLang } from "../session";
 import { loadDay, saveDay, type Target } from "../store";
 import { c, result, say } from "../ui";
 
-/** `aoc lang` shows, `aoc lang rust` switches. `aoc lang repick` is wired in with JEV. */
-export async function langCommand(t: Target, args: Args, repick?: (t: Target) => Promise<void>) {
+/** `aoc lang` shows, `aoc lang rust` switches, `aoc lang repick` asks JEV for something else. */
+export async function langCommand(t: Target, args: Args) {
   const state = loadDay(t.year, t.day);
   const want = args.rest[0];
-  if (want === "repick") {
-    if (!repick) throw new Error("repick needs JEV");
-    return repick(t);
-  }
   if (want) {
-    const lang = getLang(want);
+    const pick = want === "repick" ? await pickLang(state, state.lang ? [state.lang] : []) : { lang: getLang(want), reason: "chosen by you" };
+    const { lang } = pick;
     state.lang = lang.id;
-    state.langReason = "chosen by you";
+    state.langReason = pick.reason;
     saveDay(state);
     const { dir } = scaffold(t, lang);
     return result({ ...t, lang: lang.id, dir }, c.green(`${t.year} day ${t.day} → ${lang.name}  ${c.dim(dir)}`));
