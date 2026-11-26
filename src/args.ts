@@ -54,7 +54,8 @@ export function parseArgs(argv: string[]): Args {
 
   if (words.length && (COMMANDS as readonly string[]).includes(words[0])) a.command = words.shift() as Command;
   for (const w of words) {
-    if (/^p[12]$/.test(w)) a.part = part(w.slice(1));
+    if (a.command === "ex" && a.rest.length) a.rest.push(w); // `aoc ex add p1 142`: numbers after "add" are answers
+    else if (/^p[12]$/.test(w)) a.part = part(w.slice(1));
     else if (w === "next" || /^\d{1,4}(\/\d{1,2})?$/.test(w)) a.target.push(w);
     else a.rest.push(w);
   }

@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from "fs";
 import { join } from "path";
 import { dayDir, ROOT, type Part } from "./store";
+import { warn } from "./ui";
 
 const BASE = "https://adventofcode.com";
 
@@ -44,7 +45,7 @@ export async function puzzleHtml(year: number, day: number, refresh = false): Pr
   const file = join(dayDir(year, day), "puzzle.html");
   if (!refresh && existsSync(file)) return readFileSync(file, "utf8");
   const html = await request(`/${year}/day/${day}`);
-  if (!isLoggedIn(html)) throw new ApiError("Puzzle page came back logged out. Refresh AOC_SESSION in .env.");
+  if (!isLoggedIn(html)) warn("puzzle page came back logged out (part 1 only). Refresh AOC_SESSION in .env.");
   mkdirSync(dayDir(year, day), { recursive: true });
   writeFileSync(file, html);
   return html;

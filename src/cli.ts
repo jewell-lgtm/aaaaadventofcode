@@ -7,6 +7,8 @@ import { help } from "./commands/help";
 import { runCommand, testCommand } from "./commands/test";
 import { langCommand, langsCommand } from "./commands/lang";
 import { session } from "./session";
+import { exCommand } from "./commands/ex";
+import { puzzleCommand } from "./commands/puzzle";
 import { loadDay, loadGlobal, saveGlobal, targetFromPath, type Target } from "./store";
 import { parseTargetTokens, resolveTarget, TargetError } from "./target";
 import { c, result, setJson } from "./ui";
@@ -49,6 +51,10 @@ async function main(argv: string[]) {
       return runCommand(await session(resolve(args, now), args));
     case "lang":
       return langCommand(resolve(args, now), args);
+    case "ex":
+      return exCommand(resolve(args, now), args);
+    case "puzzle":
+      return puzzleCommand(resolve(args, now), args.force);
     default:
       throw new ArgError(`"${args.command}" isn't built yet`);
   }
