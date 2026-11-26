@@ -3,10 +3,14 @@
   "day": 5,
   "parts": {
     "1": {
-      "submissions": []
+      "submissions": [],
+      "answer": "QPJPLMNNR",
+      "solvedAt": "2026-11-26T18:52:29.836Z"
     },
     "2": {
-      "submissions": []
+      "submissions": [],
+      "answer": "BQDNWJPVJ",
+      "solvedAt": "2026-11-26T18:52:29.836Z"
     }
   },
   "startedAt": "2026-11-26T13:20:56.266Z",

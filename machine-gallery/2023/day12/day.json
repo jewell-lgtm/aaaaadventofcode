@@ -3,10 +3,14 @@
   "day": 12,
   "parts": {
     "1": {
-      "submissions": []
+      "submissions": [],
+      "answer": "7402",
+      "solvedAt": "2026-11-26T18:52:45.142Z"
     },
     "2": {
-      "submissions": []
+      "submissions": [],
+      "answer": "3384337640277",
+      "solvedAt": "2026-11-26T18:52:45.142Z"
     }
   },
   "startedAt": "2026-11-26T13:21:04.696Z",
