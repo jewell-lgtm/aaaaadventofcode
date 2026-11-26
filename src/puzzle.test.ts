@@ -53,3 +53,10 @@ describe("mergeExamples", () => {
     ]);
   });
 });
+
+describe("part 2 reusing the part 1 example", () => {
+  test("intermediate-state blocks aren't new examples", () => {
+    const ex = extractExamples(fixture("reuse.html")).map(({ text, part1, part2 }) => ({ text, part1, part2 }));
+    expect(ex).toEqual([{ text: "[A] [B]\nmove 1 from 1 to 2\n", part1: "XY", part2: "YX" }]);
+  });
+});

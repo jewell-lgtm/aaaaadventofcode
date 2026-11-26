@@ -63,6 +63,8 @@ interface Found {
   text: string;
   answer?: string;
   confident: boolean;
+  /** Paragraph introducing the block. */
+  intro?: string;
 }
 
 /** Emphasised answer: <code><em>42</em></code>, <em><code>42</code></em>, or <code>1749 - 161 = <em>1588</em></code>. */
@@ -75,7 +77,8 @@ function blockExample(a: string): Found | undefined {
   const answer = ems.length ? decode(ems[ems.length - 1][1] ?? ems[ems.length - 1][2]) : undefined;
   for (const b of blocks) {
     const before = a.slice(Math.max(0, b.index! - 400), b.index!);
-    if (/example/i.test(before.slice(before.lastIndexOf("<p>")))) return { text: decode(b[1]), answer, confident: answer !== undefined };
+    const intro = decode(before.slice(before.lastIndexOf("<p>")));
+    if (/example/i.test(intro)) return { text: decode(b[1]), answer, confident: answer !== undefined, intro };
   }
   return blocks.length ? { text: decode(blocks[0][1]), answer, confident: false } : undefined;
 }
@@ -104,30 +107,51 @@ const articleExamples = (a: string): Found[] => {
 
 /** The text says the example uses different constants ("70,70 in your memory space, but 6,6 in this example"). */
 function constantsDiffer(a: string): boolean {
-  return decode(a)
-    .split(/(?<=[.!?])\s+/)
-    .some((s) => /example/i.test(s) && /\d/.test(s) && /\b(but|only|instead|rather)\b/i.test(s));
+  return [...a.matchAll(/<p>([\s\S]*?)<\/p>/g)]
+    .flatMap(([, p]) => decode(p).split(/(?<=[.!?:])\s+/))
+    .some(
+      (s) =>
+        /\b(in|for) (this|the|the sake of) example\b/i.test(s) && /\d/.test(s) && /\b(however|but|only|instead|rather|smaller|larger)\b/i.test(s),
+    );
+}
+
+const lastAnswer = (a: string) => {
+  const ems = [...a.matchAll(EM_CODE)];
+  return ems.length ? decode(ems[ems.length - 1][1] ?? ems[ems.length - 1][2]) : undefined;
+};
+
+/**
+ * Part 2 almost always reuses the part 1 example ("again considering the example above") and then shows
+ * intermediate states, which aren't inputs. A new part 2 example needs a fresh "For example" that doesn't
+ * point back; inline list examples count only when part 1 used them too.
+ */
+function part2Examples(a: string, part1: ExtractedExample[], part1WasList: boolean): Found[] {
+  const block = blockExample(a);
+  const fresh = block?.confident && /for example/i.test(block.intro ?? "") && !/\b(above|same|again|previous)\b/i.test(block.intro ?? "");
+  if (fresh && block && !part1.some((e) => e.text === block.text)) return [block];
+  if (part1WasList) {
+    const list = listExamples(a);
+    if (list.length) return list;
+  }
+  const answer = lastAnswer(a);
+  return part1[0] && answer !== undefined ? [{ text: part1[0].text, answer, confident: part1[0].confident }] : [];
 }
 
 export function extractExamples(html: string): ExtractedExample[] {
   const arts = articles(html);
-  const out: ExtractedExample[] = [];
   const differ = arts.some((a) => constantsDiffer(a.html));
-  for (const { part, html: a } of arts) {
-    let found = articleExamples(a);
-    if (!found.length && part === 2 && out[0]) {
-      // No new example block: part 2 states the answer for the part 1 example.
-      const ems = [...a.matchAll(EM_CODE)];
-      if (ems.length) found = [{ text: out[0].text, answer: decode(ems[ems.length - 1][1] ?? ems[ems.length - 1][2]), confident: out[0].confident }];
-    }
-    for (const f of found) {
-      const key = part === 1 ? "part1" : "part2";
-      // Part 2 often states only the new answer for the same example; a reused or unclear block attaches to example 1.
-      const same = out.find((e) => e.text === f.text) ?? (part === 2 && !f.confident && found.length === 1 ? out[0] : undefined);
+  const out: ExtractedExample[] = [];
+  if (!arts[0]) return out;
+  const p1 = articleExamples(arts[0].html);
+  const p1List = p1.length > 1 || (p1.length === 1 && !blockExample(arts[0].html)?.confident);
+  for (const f of p1) out.push({ text: f.text, part1: f.answer, confident: f.confident, constantsDiffer: differ });
+  if (arts[1]) {
+    for (const f of part2Examples(arts[1].html, out, p1List)) {
+      const same = out.find((e) => e.text === f.text);
       if (same) {
-        same[key] = f.answer;
+        same.part2 = f.answer;
         same.confident &&= f.confident;
-      } else out.push({ text: f.text, [key]: f.answer, confident: f.confident, constantsDiffer: differ });
+      } else out.push({ text: f.text, part2: f.answer, confident: f.confident, constantsDiffer: differ });
     }
   }
   return out;
