@@ -1,0 +1,11 @@
+{
+  "name": "R",
+  "aliases": ["rscript"],
+  "specialist": true,
+  "criteria": "Vectorised base R over numeric vectors, matrices and tables: pick it when the puzzle is column statistics, counting/tabulating (table, tapply, outer), or whole-array matrix arithmetic; avoid for searches, mutable graph state or anything needing exact integers beyond 2^53.",
+  "solution": {
+    "1": "part1.R",
+    "2": "part2.R"
+  },
+  "run": "Rscript --vanilla main.R"
+}

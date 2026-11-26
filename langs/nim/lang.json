@@ -1,0 +1,12 @@
+{
+  "name": "Nim",
+  "aliases": [],
+  "criteria": "Python-like syntax compiled to fast C with value-type seqs/arrays, tables, sets, heapqueue and compile-time templates; good for brute-force simulation and graph search where Python would be too slow.",
+  "solution": {
+    "1": "part1.nim",
+    "2": "part2.nim"
+  },
+  "build": "mkdir -p .build && { [ -f .build/main ] && [ -z \"$(find . -name '*.nim' -newer .build/main)\" ] || nim c -d:release --hints:off --warnings:off --nimcache:.build/cache -o:.build/main main.nim; }",
+  "run": ".build/main",
+  "ignore": [".build/"]
+}

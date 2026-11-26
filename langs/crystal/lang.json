@@ -1,0 +1,15 @@
+{
+  "name": "Crystal",
+  "aliases": ["cr"],
+  "criteria": "Ruby-like expressiveness (blocks, Enumerable chains, case/in, Hash/Set with defaults) compiled to native speed with static types; good for parsing-heavy puzzles that then need a fast simulation or search.",
+  "solution": {
+    "1": "part1.cr",
+    "2": "part2.cr"
+  },
+  "build": "mkdir -p .build && { [ -f .build/main ] && [ -z \"$(find . -name '*.cr' -newer .build/main)\" ] || crystal build --release --no-debug -o .build/main main.cr; }",
+  "run": ".build/main",
+  "caches": {
+    "/root/.cache/crystal": "crystal"
+  },
+  "ignore": [".build/"]
+}

@@ -19,7 +19,7 @@ export interface Lang {
   aliases?: string[];
   /** One line for JEV: what puzzles this language is great for. */
   criteria: string;
-  /** Only pick on a strong fit (R, octave, sql, jq). */
+  /** Only pick on a strong fit (R, octave). */
   specialist?: boolean;
   /** Files you edit, relative to the lang dir, per part. Opened by nvim. */
   solution: { 1: string; 2: string };

@@ -1,0 +1,11 @@
+{
+  "name": "GNU Octave",
+  "aliases": ["matlab", "m"],
+  "specialist": true,
+  "criteria": "MATLAB-style whole-matrix maths: pick it for grids and cellular automata via conv2/logical masks, linear algebra (solving systems, matrix powers for linear recurrences), or vectorised numeric scans; poor at string-heavy parsing, hash maps, queues and recursion.",
+  "solution": {
+    "1": "part1.m",
+    "2": "part2.m"
+  },
+  "run": "octave-cli --quiet --norc --no-history main.m"
+}

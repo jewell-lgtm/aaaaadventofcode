@@ -22,6 +22,6 @@ test("repick excludes the current language", () => {
 });
 
 test("question criteria mark specialists", () => {
-  const q = questions({ choices: [{ id: "sql", name: "SQL", criteria: "tables", specialist: true, solution: { 1: "a", 2: "b" }, run: "x" }], recent: [], usedThisYear: [] });
-  expect(q.language.criteria.sql).toStartWith("SPECIALIST.");
+  const q = questions({ choices: [{ id: "octave", name: "Octave", criteria: "tables", specialist: true, solution: { 1: "a", 2: "b" }, run: "x" }], recent: [], usedThisYear: [] });
+  expect(q.language.criteria.octave).toStartWith("SPECIALIST.");
 });
