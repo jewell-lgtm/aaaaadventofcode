@@ -1,0 +1,19 @@
+{
+  "year": 2017,
+  "day": 14,
+  "parts": {
+    "1": {
+      "submissions": [],
+      "answer": "8190",
+      "solvedAt": "2025-11-04T16:54:31+01:00"
+    },
+    "2": {
+      "submissions": [],
+      "answer": "1134",
+      "solvedAt": "2025-11-04T16:54:31+01:00"
+    }
+  },
+  "lang": "ts",
+  "langReason": "migrated from v1",
+  "startedAt": "2025-11-04T16:54:31+01:00"
+}

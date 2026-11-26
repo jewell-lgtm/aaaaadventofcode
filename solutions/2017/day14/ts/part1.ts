@@ -1,4 +1,4 @@
-import { solve as knotHash } from "../day10/part2";
+import { solve as knotHash } from "../../day10/ts/part2";
 
 export function solve(input: string): number | string {
   const values = Array.from({ length: 128 }, (_, i) => `${input.trim()}-${i}`);

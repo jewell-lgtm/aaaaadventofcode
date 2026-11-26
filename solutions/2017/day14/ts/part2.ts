@@ -1,4 +1,4 @@
-import { solve as knotHash } from "../day10/part2";
+import { solve as knotHash } from "../../day10/ts/part2";
 
 interface Coordinate {
   ___useMemoizedConstructorPlease: Symbol;

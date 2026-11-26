@@ -19,6 +19,7 @@ export interface VerifyRow {
 /** Every solved part × every language dir present in that day, against the accepted answer. */
 export async function verifyCommand(year: number | undefined, langFilter: string | undefined) {
   const rows: VerifyRow[] = [];
+  const broken = new Map<string, string>(); // lang id → build error, so a broken image fails fast
   for (const y of year ? [year] : listYears()) {
     for (const state of listDays(y)) {
       if (!existsSync(join(dayDir(y, state.day), "input.txt"))) continue;
@@ -30,10 +31,16 @@ export async function verifyCommand(year: number | undefined, langFilter: string
         if (expected === undefined) continue;
         for (const lang of langs) {
           const s = { t: { year: y, day: state.day }, state, lang, part, dir: join(dayDir(y, state.day), lang.id) };
-          const res = await runReal(s).catch((e) => ({ ok: false, answer: undefined, ms: 0, log: String(e.message ?? e) }));
+          const res = broken.has(lang.id)
+            ? { ok: false, answer: undefined, ms: 0, log: broken.get(lang.id)! }
+            : await runReal(s).catch((e) => {
+                if (e.name === "AocError" && /build failed/.test(e.message) && /docker/.test(e.message)) broken.set(lang.id, e.message);
+                return { ok: false, answer: undefined, ms: 0, log: String(e.message ?? e) };
+              });
           const pass = res.answer === expected;
+          const why = pass ? "" : res.log.trim().split("\n").filter((l) => /error|exception|failed/i.test(l)).at(0) ?? res.log.trim().split("\n").at(-1) ?? "";
           rows.push({ year: y, day: state.day, part, lang: lang.id, expected, answer: res.answer, pass, ms: res.ms });
-          say(`${pass ? c.green("✓") : c.red("✗")} ${y} ${String(state.day).padStart(2)} p${part} ${lang.id.padEnd(10)} ${c.dim(`${res.ms.toFixed(0)}ms`)}${pass ? "" : `  want ${expected} got ${res.answer ?? c.red("error")}`}`);
+          say(`${pass ? c.green("✓") : c.red("✗")} ${y} ${String(state.day).padStart(2)} p${part} ${lang.id.padEnd(10)} ${c.dim(`${res.ms.toFixed(0)}ms`)}${pass ? "" : `  want ${expected} got ${res.answer ?? c.red("error")}${res.answer ? "" : c.dim(`  ${why.trim().slice(0, 140)}`)}`}`);
         }
       }
     }

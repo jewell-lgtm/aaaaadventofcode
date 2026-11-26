@@ -1,0 +1,19 @@
+{
+  "year": 2024,
+  "day": 1,
+  "parts": {
+    "1": {
+      "submissions": [],
+      "answer": "2367773",
+      "solvedAt": "2025-11-02T13:55:46+01:00"
+    },
+    "2": {
+      "submissions": [],
+      "answer": "21271939",
+      "solvedAt": "2025-11-02T13:55:46+01:00"
+    }
+  },
+  "lang": "haskell",
+  "langReason": "migrated from v1",
+  "startedAt": "2025-11-02T13:55:46+01:00"
+}
