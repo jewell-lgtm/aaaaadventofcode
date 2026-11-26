@@ -2,7 +2,7 @@ import { createHash } from "crypto";
 import { readdirSync, readFileSync, statSync } from "fs";
 import { join, relative } from "path";
 import { LANGS_DIR, type Lang } from "./langs";
-import { SOLUTIONS, type Part } from "./store";
+import { ROOT, type Part } from "./store";
 import { c, say } from "./ui";
 
 export interface RunEnv {
@@ -53,7 +53,7 @@ function langHash(lang: Lang): string {
     }
   };
   walk(dir);
-  return h.digest("hex").slice(0, 10);
+  return h.update("mount:root").digest("hex").slice(0, 10);
 }
 
 const containerName = (lang: Lang) => `aoc-${lang.id}`;
@@ -76,14 +76,14 @@ async function ensureContainer(lang: Lang): Promise<string> {
   const volumes = Object.entries(lang.caches ?? {}).flatMap(([path, vol]) => ["-v", `aoc-cache-${vol}:${path}`]);
   const run = await sh([
     "docker", "run", "-d", "--name", name, "--label", `aoc.hash=${hash}`, "--init",
-    "-v", `${SOLUTIONS}:/aoc/solutions`, ...volumes, image, "sleep", "infinity",
+    "-v", `${ROOT}:/aoc`, ...volumes, image, "sleep", "infinity",
   ]);
   if (run.code !== 0) throw new BuildError(lang.id, run.stderr);
   return name;
 }
 
 function containerCwd(dir: string): string {
-  return "/aoc/solutions/" + relative(SOLUTIONS, dir);
+  return "/aoc/" + relative(ROOT, dir);
 }
 
 // --- public -----------------------------------------------------------------

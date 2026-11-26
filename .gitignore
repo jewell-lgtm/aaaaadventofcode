@@ -23,3 +23,7 @@ solutions/**/expected*.txt
 .aoc/
 solutions/**/puzzle.html
 solutions/**/puzzle.md
+gallery/**/input.txt
+gallery/**/puzzle.*
+gallery/**/examples/
+solutions/**/examples/

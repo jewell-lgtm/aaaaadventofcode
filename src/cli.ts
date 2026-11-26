@@ -12,7 +12,7 @@ import { puzzleCommand } from "./commands/puzzle";
 import { submitCommand } from "./commands/submit";
 import { verifyCommand } from "./commands/verify";
 import { watchCommand } from "./commands/watch";
-import { loadDay, loadGlobal, saveGlobal, targetFromPath, type Target } from "./store";
+import { useGallery, loadDay, loadGlobal, saveGlobal, targetFromPath, type Target } from "./store";
 import { parseTargetTokens, resolveTarget, TargetError } from "./target";
 import { c, result, setJson } from "./ui";
 
@@ -23,13 +23,14 @@ export function resolve(args: Args, now = Date.now()): Target {
     last: loadGlobal().last,
     lookup: loadDay,
   });
-  saveGlobal({ ...loadGlobal(), last: target });
+  if (!args.gallery) saveGlobal({ ...loadGlobal(), last: target });
   return target;
 }
 
 async function main(argv: string[]) {
   const args = parseArgs(argv);
   setJson(args.json);
+  if (args.gallery) useGallery();
   const now = Date.now();
 
   switch (args.command) {

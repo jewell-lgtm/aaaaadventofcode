@@ -28,7 +28,8 @@ export async function resolveLang(state: DayState, args: Args, pick?: (s: DaySta
 export async function session(t: Target, args: Args, pick?: (s: DayState) => Promise<Lang | undefined>): Promise<Session> {
   const state = loadDay(t.year, t.day);
   const lang = await resolveLang(state, args, pick);
-  if (state.lang !== lang.id) {
+  // A one-off --lang doesn't switch the day's language (that's `aoc lang X`); it only sets it on a fresh day.
+  if (!state.lang) {
     state.lang = lang.id;
     saveDay(state);
   }

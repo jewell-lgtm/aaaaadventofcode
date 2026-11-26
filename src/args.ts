@@ -14,6 +14,8 @@ export interface Args {
   part?: Part;
   lang?: string;
   json: boolean;
+  /** `aoc gallery …`: operate on gallery/ instead of solutions/. */
+  gallery: boolean;
   yes: boolean;
   force: boolean;
 }
@@ -23,7 +25,7 @@ export class ArgError extends Error {}
 const VALUE_FLAGS = new Set(["--lang", "--part", "-p", "--year", "--day"]);
 
 export function parseArgs(argv: string[]): Args {
-  const a: Args = { command: "start", target: [], rest: [], json: false, yes: false, force: false };
+  const a: Args = { command: "start", target: [], rest: [], json: false, gallery: false, yes: false, force: false };
   const words: string[] = [];
   let year: string | undefined;
   let day: string | undefined;
@@ -52,6 +54,10 @@ export function parseArgs(argv: string[]): Args {
     }
   }
 
+  if (words[0] === "gallery") {
+    a.gallery = true;
+    words.shift();
+  }
   if (words.length && (COMMANDS as readonly string[]).includes(words[0])) a.command = words.shift() as Command;
   for (const w of words) {
     if (a.command === "ex" && a.rest.length) a.rest.push(w); // `aoc ex add p1 142`: numbers after "add" are answers
@@ -59,6 +65,7 @@ export function parseArgs(argv: string[]): Args {
     else if (w === "next" || /^\d{1,4}(\/\d{1,2})?$/.test(w)) a.target.push(w);
     else a.rest.push(w);
   }
+  if (a.rest.length && !["lang", "langs", "ex"].includes(a.command)) throw new ArgError(`Don't understand "${a.rest.join(" ")}". See aoc help`);
   if (year) a.target.unshift(year);
   if (day) a.target.push(day);
   return a;

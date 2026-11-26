@@ -65,7 +65,8 @@ interface Found {
   confident: boolean;
 }
 
-const EM_CODE = /<code><em>(.*?)<\/em><\/code>|<em><code>(.*?)<\/code><\/em>/g;
+/** Emphasised answer: <code><em>42</em></code>, <em><code>42</code></em>, or <code>1749 - 161 = <em>1588</em></code>. */
+const EM_CODE = /<code>[^<]*<em>(.*?)<\/em>[^<]*<\/code>|<em><code>(.*?)<\/code><\/em>/g;
 
 /** Block example: first <pre><code> after a paragraph mentioning "example"; expected = last <code><em> in the article. */
 function blockExample(a: string): Found | undefined {
