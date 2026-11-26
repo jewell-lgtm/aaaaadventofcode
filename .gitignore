@@ -18,3 +18,8 @@ solutions/**/expected*.txt
 .aoc-last
 
 .claude
+
+# aoc v2
+.aoc/
+solutions/**/puzzle.html
+solutions/**/puzzle.md
