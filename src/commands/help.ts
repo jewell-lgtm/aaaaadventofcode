@@ -11,6 +11,7 @@ TARGETS (any command)
 
 COMMANDS
   aoc [target]         start (fetch puzzle+input, pick lang, scaffold) then test
+  aoc info             start quietly, print paths (editors)
   aoc test   [p1|p2]   run examples, compare expected
   aoc run    [p1|p2]   real input, compare accepted answer
   aoc submit [p1|p2]   run + submit, record verdict, fetch part 2

@@ -1,7 +1,7 @@
 import type { Part } from "./store";
 
 export const COMMANDS = [
-  "start", "test", "run", "submit", "verify", "watch", "puzzle", "lang", "langs", "status", "ex", "where", "help",
+  "start", "info", "test", "run", "submit", "verify", "watch", "puzzle", "lang", "langs", "status", "ex", "where", "help",
 ] as const;
 export type Command = (typeof COMMANDS)[number];
 

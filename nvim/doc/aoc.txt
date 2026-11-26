@@ -1,0 +1,107 @@
+*aoc.txt*  Advent of Code without leaving Neovim
+
+A thin async front end for the `aoc` CLI (aaaaadventofcode repo). Every
+command runs `aoc … --json` in the background; the CLI owns all state.
+
+==============================================================================
+CONTENTS                                                         *aoc-contents*
+
+  1. Workflow ........................................... |aoc-workflow|
+  2. Commands ........................................... |aoc-commands|
+  3. Keymaps ............................................ |aoc-keymaps|
+  4. Targets ............................................ |aoc-targets|
+  5. Examples ........................................... |aoc-examples|
+  6. Gallery ............................................ |aoc-gallery|
+  7. Setup .............................................. |aoc-setup|
+
+==============================================================================
+1. WORKFLOW                                                      *aoc-workflow*
+
+  <leader>aa   open today's puzzle (or the day of the current buffer)
+               → fetches puzzle + input, JEV picks a language, scaffolds,
+                 opens partN in that language with puzzle.md beside it
+  <leader>at   test against the examples (float; failures → quickfix,
+               jumping to the example in examples.toml)
+  <leader>ar   run against your real input (answer copied to +)
+  <leader>as   submit (dry run first, then confirm)
+               ⭐ → part 2 text appears in puzzle.md, run <leader>at again
+
+Target resolution follows the buffer: inside solutions/2017/day03/… every
+command targets 2017 day 3. Elsewhere it's today (during the event), else the
+last day you touched.
+
+==============================================================================
+2. COMMANDS                                                      *aoc-commands*
+
+:Aoc [target]          Start/resume and open. `:Aoc 2017 3`, `:Aoc 2026`,
+                       `:Aoc next`.                                     *:Aoc*
+:Aoc {sub} [args]      Any subcommand below, e.g. `:Aoc test p2`.
+:AocTest [p1|p2]       Examples.                                    *:AocTest*
+:AocRun [p1|p2]        Real input.                                   *:AocRun*
+:AocSubmit [p1|p2]     Submit with confirmation.                  *:AocSubmit*
+:AocPuzzle [-f]        puzzle.md in a vsplit; -f refetches.       *:AocPuzzle*
+:AocNext [year]        Newest released day you haven't started.     *:AocNext*
+:AocLang [id|repick]   Show / switch language / ask JEV again.      *:AocLang*
+:AocWatch              Toggle test-on-save.                        *:AocWatch*
+:AocStatus [year]      Star grid.                                 *:AocStatus*
+:AocVerify [year]      Rerun every solved part (regression).      *:AocVerify*
+:AocGallery [filter]   Browse the 34-language gallery.           *:AocGallery*
+
+==============================================================================
+3. KEYMAPS                                                        *aoc-keymaps*
+
+  <leader>aa  open            <leader>ap  puzzle
+  <leader>an  next            <leader>ae  examples.toml
+  <leader>at  test            <leader>aw  toggle test on save
+  <leader>ar  run             <leader>al  re-pick language (JEV)
+  <leader>as  submit          <leader>ag  gallery
+  <leader>a*  stars
+
+Disable with `opts = { keys = false }`.
+
+==============================================================================
+4. TARGETS                                                        *aoc-targets*
+
+  (nothing)        buffer's day › today (Dec 1-12, 2025+) › last day
+  2026             today if 2026 is live, else earliest incomplete 2026 day
+  next             newest released day you haven't started (any year)
+  2026 next        same, within 2026
+  2017 3, 2017/3   explicit
+
+Language: `--lang x`, `AOC_LANG=x`, `LANG=x` (only when x is a bank language),
+day.json, else JEV picks one (languages from the previous 3 days excluded).
+
+==============================================================================
+5. EXAMPLES                                                      *aoc-examples*
+
+examples.toml holds the tests. aoc fills it from the puzzle text (and again
+after part 1 for part 2), and never overwrites values you've edited:
+>toml
+  [[example]]
+  input = "examples/1.txt"     # or text = """..."""
+  part1 = "142"
+  part2 = ""
+  args = { size = 7 }          # example-only constants
+  auto = true                  # set false once you've checked it
+<
+In a solution, read example constants with `arg("size", 71)`; `example`
+is true while testing.
+
+==============================================================================
+6. GALLERY                                                        *aoc-gallery*
+
+gallery/ has 10 classic puzzles solved in every bank language. `:AocGallery`
+opens a telescope picker. <CR> opens part 1, <C-t> part 2, and <C-v> opens it
+in a vsplit so you can line up languages. Filter by language or title:
+`:AocGallery rust`, `:AocGallery chiton`.
+
+==============================================================================
+7. SETUP                                                            *aoc-setup*
+>lua
+  { dir = '~/Code/jewell-lgtm/aaaaadventofcode/nvim', name = 'aoc',
+    opts = { test_on_save = false, open_puzzle = true, quiet_pass = false } }
+<
+Statusline (mini.statusline): add `require('aoc').status_component()` to a
+section, which shows `2026·d03·rust ★☆` inside a day dir.
+
+ vim:tw=78:ts=8:ft=help:norl:

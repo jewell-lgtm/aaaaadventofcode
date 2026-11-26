@@ -27,3 +27,4 @@ gallery/**/input.txt
 gallery/**/puzzle.*
 gallery/**/examples/
 solutions/**/examples/
+nvim/doc/tags

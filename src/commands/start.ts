@@ -2,10 +2,10 @@ import * as api from "../api";
 import type { Args } from "../args";
 import { dayDir, loadDay, saveDay, type Target } from "../store";
 import { syncPuzzle } from "../sync";
-import { c, result, say, warn } from "../ui";
+import { c, say, warn } from "../ui";
 
 /** Ensures the day exists locally: day.json, puzzle.md, examples, input. Idempotent. */
-export async function start(t: Target, _args: Args) {
+export async function start(t: Target, _args: Args, opts: { quiet?: boolean } = {}) {
   const initial = loadDay(t.year, t.day);
   const fresh = initial.startedAt === undefined;
   if (fresh) saveDay({ ...initial, startedAt: new Date().toISOString() });
@@ -15,5 +15,5 @@ export async function start(t: Target, _args: Args) {
 
   const { title } = loadDay(t.year, t.day);
   if (fresh) say(c.green(`✦ started ${t.year} day ${t.day}${title ? `: ${title}` : ""}`));
-  result({ ...t, dir: dayDir(t.year, t.day), title }, c.dim(`${dayDir(t.year, t.day)}`));
+  if (!opts.quiet) say(c.dim(dayDir(t.year, t.day)));
 }

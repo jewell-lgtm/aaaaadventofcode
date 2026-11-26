@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, writeFileSync, mkdirSync } from "fs";
+import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "fs";
 import { join } from "path";
 import { dayDir, ROOT, type Part } from "./store";
 import { warn } from "./ui";
@@ -43,7 +43,11 @@ export const isLoggedIn = (html: string) => !html.includes("[Log In]");
 /** Puzzle page HTML. Cached; `refresh` after solving part 1 to get part 2. */
 export async function puzzleHtml(year: number, day: number, refresh = false): Promise<string> {
   const file = join(dayDir(year, day), "puzzle.html");
-  if (!refresh && existsSync(file)) return readFileSync(file, "utf8");
+  if (!refresh && existsSync(file)) {
+    const cached = readFileSync(file, "utf8");
+    // Logged-out copies (part 1 only) get retried hourly, so part 2 shows up once AOC_SESSION works.
+    if (isLoggedIn(cached) || Date.now() - statSync(file).mtimeMs < 3600_000) return cached;
+  }
   const html = await request(`/${year}/day/${day}`);
   if (!isLoggedIn(html)) warn("puzzle page came back logged out (part 1 only). Refresh AOC_SESSION in .env.");
   mkdirSync(dayDir(year, day), { recursive: true });

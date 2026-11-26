@@ -8,6 +8,7 @@ import { runCommand, testCommand } from "./commands/test";
 import { langCommand, langsCommand } from "./commands/lang";
 import { session } from "./session";
 import { exCommand } from "./commands/ex";
+import { infoCommand } from "./commands/info";
 import { puzzleCommand } from "./commands/puzzle";
 import { submitCommand } from "./commands/submit";
 import { verifyCommand } from "./commands/verify";
@@ -48,6 +49,11 @@ async function main(argv: string[]) {
       const t = resolve(args, now);
       await start(t, args);
       return testCommand(await session(t, args), { fallbackToReal: true });
+    }
+    case "info": {
+      const t = resolve(args, now);
+      await start(t, args, { quiet: true });
+      return infoCommand(await session(t, args));
     }
     case "test":
       return testCommand(await session(resolve(args, now), args));
