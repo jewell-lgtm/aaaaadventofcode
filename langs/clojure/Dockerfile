@@ -1,5 +1,4 @@
-# Official Temurin image via the ECR mirror of Docker Hub's library (same image, no pull rate limit).
-FROM public.ecr.aws/docker/library/eclipse-temurin:25.0.5.1_2-jdk-noble
+FROM eclipse-temurin:25.0.5.1_2-jdk-noble
 ARG CLOJURE_CLI=1.12.7.1681
 RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates && rm -rf /var/lib/apt/lists/* \
  && curl -fsSL https://download.clojure.org/install/linux-install-$CLOJURE_CLI.sh | bash

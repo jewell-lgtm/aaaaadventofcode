@@ -1,5 +1,4 @@
-# Official Temurin image via the ECR mirror of Docker Hub's library (same image, no pull rate limit).
-FROM public.ecr.aws/docker/library/eclipse-temurin:25.0.5.1_2-jdk-noble
+FROM eclipse-temurin:25.0.5.1_2-jdk-noble
 ARG KOTLIN=2.4.21
 RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates unzip && rm -rf /var/lib/apt/lists/* \
  && curl -fsSL -o /tmp/k.zip https://github.com/JetBrains/kotlin/releases/download/v$KOTLIN/kotlin-compiler-$KOTLIN.zip \
