@@ -9,6 +9,9 @@ import { langCommand, langsCommand } from "./commands/lang";
 import { session } from "./session";
 import { exCommand } from "./commands/ex";
 import { puzzleCommand } from "./commands/puzzle";
+import { submitCommand } from "./commands/submit";
+import { verifyCommand } from "./commands/verify";
+import { watchCommand } from "./commands/watch";
 import { loadDay, loadGlobal, saveGlobal, targetFromPath, type Target } from "./store";
 import { parseTargetTokens, resolveTarget, TargetError } from "./target";
 import { c, result, setJson } from "./ui";
@@ -55,6 +58,12 @@ async function main(argv: string[]) {
       return exCommand(resolve(args, now), args);
     case "puzzle":
       return puzzleCommand(resolve(args, now), args.force);
+    case "submit":
+      return submitCommand(await session(resolve(args, now), args), args);
+    case "verify":
+      return verifyCommand(args.target[0] ? Number(args.target[0]) : undefined, args.lang);
+    case "watch":
+      return watchCommand(await session(resolve(args, now), args));
     default:
       throw new ArgError(`"${args.command}" isn't built yet`);
   }

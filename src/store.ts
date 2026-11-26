@@ -14,6 +14,8 @@ export interface Submission {
   answer: string;
   verdict: Verdict;
   at: string;
+  /** AoC cooldown after this attempt. */
+  waitUntil?: string;
 }
 
 export interface PartState {
