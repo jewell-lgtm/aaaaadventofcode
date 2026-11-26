@@ -8,7 +8,7 @@ Each language is a folder `langs/<id>/`. The harness (`src/`) is language-agnost
   - `name`: display name.
   - `aliases`: optional, lowercase.
   - `criteria`: one sentence, used by an LLM to pick languages per puzzle. Say what this language is *genuinely good at* for AoC-style problems, concretely (e.g. "pattern matching on parsed ASTs", "fast mutable 2D arrays for brute-force simulation"), not marketing.
-  - `specialist`: true only for r/octave/sql/jq.
+  - `specialist`: true only for r/octave.
   - `solution`: `{ "1": "<path>", "2": "<path>" }`. The files the user edits, relative to the lang dir.
   - `build`: optional shell, run before every run. **Must be incremental**: near-instant when nothing changed. Prefer the toolchain's own incremental build, or a `[ out -nt src ] ||` guard.
   - `run`: shell. Reads the puzzle input from stdin.
@@ -39,7 +39,7 @@ The template must compile and run as-is, printing `0`.
 
 ## Gallery solutions
 
-`gallery/YYYY/dayDD/<id>/` is a scaffolded template with real solutions in it. Purpose: a human browses the same puzzle across languages to decide which language they like for a kind of problem. So:
+`machine-gallery/YYYY/dayDD/<id>/` is a scaffolded template with real solutions in it. Purpose: a human browses the same puzzle across languages to decide which language they like for a kind of problem. So:
 
 - **Idiomatic, not clever.** Write it the way a strong, tasteful practitioner of that language would. Use the language's signature features where they fit naturally (pattern matching, pipelines, comprehensions, CTEs, vectorisation…).
 - Readable: short header comment (2-4 lines) naming the approach and what's characteristic about doing it in this language. Small helper functions over one giant function. No golfing.
@@ -52,7 +52,7 @@ The template must compile and run as-is, printing `0`.
 
 ```
 aoc langs                                         # bank, check yours shows up
-aoc gallery test 2022 12 p1 --lang <id>           # scaffolds gallery/2022/day12/<id>/ if missing, runs part 1 examples
+aoc gallery test 2022 12 p1 --lang <id>           # scaffolds machine-gallery/2022/day12/<id>/ if missing, runs part 1 examples
 aoc gallery test 2022 12 p2 --lang <id>
 aoc gallery ex 2022 12                            # list examples
 ```
@@ -74,8 +74,8 @@ The first use of a language builds its Docker image (can take minutes). Later ru
 | 2022/day21 | Monkey Math | expression tree, solve for unknown |
 | 2021/day14 | Extended Polymerization | pair frequency counting |
 
-The puzzle text is in `gallery/YYYY/dayDD/puzzle.md` (part 1 only, since we're logged out; you know the part 2 twists). Examples and expected answers are in `examples.toml`.
+The puzzle text is in `machine-gallery/YYYY/dayDD/puzzle.md` (part 1 only, since we're logged out; you know the part 2 twists). Examples and expected answers are in `examples.toml`.
 
 ## Rules for parallel work
 
-Several agents work in this repo at once, each on its own languages. Only create or edit `langs/<your ids>/` and `gallery/*/day*/<your ids>/`. Never touch `src/`, other languages, `day.json`, `examples.toml` or git. If the harness gets in your way, stop and report what you'd change.
+Several agents work in this repo at once, each on its own languages. Only create or edit `langs/<your ids>/` and `machine-gallery/*/day*/<your ids>/`. Never touch `src/`, other languages, `day.json`, `examples.toml` or git. If the harness gets in your way, stop and report what you'd change.

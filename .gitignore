@@ -23,9 +23,9 @@ solutions/**/expected*.txt
 .aoc/
 solutions/**/puzzle.html
 solutions/**/puzzle.md
-gallery/**/input.txt
-gallery/**/puzzle.*
-gallery/**/examples/
+machine-gallery/**/input.txt
+machine-gallery/**/puzzle.*
+machine-gallery/**/examples/
 solutions/**/examples/
 nvim/doc/tags
 
@@ -40,7 +40,7 @@ nvim/doc/tags
 **/target/
 **/obj/
 **/__pycache__/
-gallery/**/bin/
+machine-gallery/**/bin/
 solutions/**/bin/
-gallery/**/build/
+machine-gallery/**/build/
 solutions/**/build/

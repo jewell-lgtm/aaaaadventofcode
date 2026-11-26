@@ -306,9 +306,9 @@ end
 
 -- ── gallery ────────────────────────────────────────────────────────────────
 
---- Telescope picker over gallery/YYYY/dayDD/<lang>/<solution>. <CR> opens, <C-v> vsplits (compare languages).
+--- Telescope picker over machine-gallery/YYYY/dayDD/<lang>/<solution>. <CR> opens, <C-v> vsplits (compare languages).
 function M.gallery(fargs)
-  local root = M.config.root .. '/gallery'
+  local root = M.config.root .. '/machine-gallery'
   local langs_dir = M.config.root .. '/langs'
   local entries = {}
   for _, day in ipairs(vim.fn.glob(root .. '/*/day*', false, true)) do
@@ -397,6 +397,22 @@ function M.setup(opts)
       if state.watch and not state.running then
         M.test {}
       end
+    end,
+  })
+  -- Agent-written reference code: read-only, labelled, never mistaken for yours.
+  vim.api.nvim_create_autocmd('BufReadPost', {
+    group = group,
+    pattern = M.config.root .. '/machine-gallery/*',
+    callback = function(ev)
+      vim.bo[ev.buf].readonly = true
+      vim.bo[ev.buf].modifiable = false
+      vim.api.nvim_create_autocmd('BufWinEnter', {
+        buffer = ev.buf,
+        callback = function()
+          vim.wo.winbar = '%#DiagnosticWarn# 🤖 machine-gallery: agent-written reference, not yours %*'
+        end,
+      })
+      vim.wo.winbar = '%#DiagnosticWarn# 🤖 machine-gallery: agent-written reference, not yours %*'
     end,
   })
   vim.api.nvim_create_autocmd('BufEnter', {

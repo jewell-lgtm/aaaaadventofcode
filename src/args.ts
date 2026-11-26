@@ -17,7 +17,7 @@ export interface Args {
   /** `aoc run --input big.txt`: any file instead of input.txt (no answer comparison). */
   input?: string;
   json: boolean;
-  /** `aoc gallery …`: operate on gallery/ instead of solutions/. */
+  /** `aoc gallery …`: operate on machine-gallery/ instead of solutions/. */
   gallery: boolean;
   yes: boolean;
   force: boolean;

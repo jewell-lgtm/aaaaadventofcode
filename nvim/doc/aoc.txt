@@ -45,7 +45,7 @@ last day you touched.
 :AocWatch              Toggle test-on-save.                        *:AocWatch*
 :AocStatus [year]      Star grid.                                 *:AocStatus*
 :AocVerify [year]      Rerun every solved part (regression).      *:AocVerify*
-:AocGallery [filter]   Browse the 34-language gallery.           *:AocGallery*
+:AocGallery [filter]   Browse the 32-language gallery.           *:AocGallery*
 
 ==============================================================================
 3. KEYMAPS                                                        *aoc-keymaps*
@@ -90,7 +90,7 @@ is true while testing.
 ==============================================================================
 6. GALLERY                                                        *aoc-gallery*
 
-gallery/ has 10 classic puzzles solved in every bank language. `:AocGallery`
+machine-gallery/ has 10 classic puzzles solved in every bank language. `:AocGallery`
 opens a telescope picker. <CR> opens part 1, <C-t> part 2, and <C-v> opens it
 in a vsplit so you can line up languages. Filter by language or title:
 `:AocGallery rust`, `:AocGallery chiton`.

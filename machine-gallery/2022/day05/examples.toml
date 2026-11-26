@@ -1,0 +1,6 @@
+# Examples for `aoc test`. Edit freely: fix expected values, add args, add more [[example]] blocks.
+[[example]]
+input = "examples/1.txt"
+part1 = "CMZ"
+part2 = "MCD"
+auto = true

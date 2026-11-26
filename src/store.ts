@@ -3,10 +3,10 @@ import { dirname, join, relative, sep } from "path";
 import { isFinalDay } from "./calendar";
 
 export const ROOT = join(import.meta.dir, "..");
-/** solutions/ normally; gallery/ under `aoc gallery …`. Same YYYY/dayDD/<lang> layout. */
+/** solutions/ (yours) normally; machine-gallery/ (agent-written) under `aoc gallery …`. Same YYYY/dayDD/<lang> layout. */
 export let SOLUTIONS = join(ROOT, "solutions");
 export function useGallery() {
-  SOLUTIONS = join(ROOT, "gallery");
+  SOLUTIONS = join(ROOT, "machine-gallery");
 }
 const STATE_FILE = join(ROOT, ".aoc", "state.json");
 

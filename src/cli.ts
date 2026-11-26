@@ -15,7 +15,7 @@ import { verifyCommand } from "./commands/verify";
 import { watchCommand } from "./commands/watch";
 import { useGallery, loadDay, loadGlobal, saveGlobal, targetFromPath, type Target } from "./store";
 import { parseTargetTokens, resolveTarget, TargetError } from "./target";
-import { c, result, setJson } from "./ui";
+import { c, result, say, setJson } from "./ui";
 
 export function resolve(args: Args, now = Date.now()): Target {
   const target = resolveTarget(parseTargetTokens(args.target), {
@@ -31,7 +31,10 @@ export function resolve(args: Args, now = Date.now()): Target {
 async function main(argv: string[]) {
   const args = parseArgs(argv);
   setJson(args.json);
-  if (args.gallery) useGallery();
+  if (args.gallery) {
+    useGallery();
+    say(c.yellow("🤖 machine-gallery: agent-written reference solutions, not yours"));
+  }
   const now = Date.now();
 
   switch (args.command) {
