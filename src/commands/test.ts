@@ -77,7 +77,11 @@ export interface RealRun extends RunResult {
 }
 
 /** Real input. */
-export async function runReal(s: Session): Promise<RealRun> {
+export async function runReal(s: Session, custom?: string): Promise<RealRun> {
+  if (custom) {
+    const r = await prepared(s);
+    return r.run(readFileSync(custom, "utf8"), { part: s.part, example: false });
+  }
   const file = join(dayDir(s.t.year, s.t.day), "input.txt");
   if (!existsSync(file)) {
     const { input } = await import("../api");
@@ -89,9 +93,9 @@ export async function runReal(s: Session): Promise<RealRun> {
   return { ...res, accepted, match: accepted === undefined ? undefined : res.answer === accepted };
 }
 
-export async function runCommand(s: Session) {
-  say(c.dim(`${s.t.year} day ${s.t.day} · part ${s.part} · ${s.lang.name} · input.txt`));
-  const res = await runReal(s);
+export async function runCommand(s: Session, custom?: string) {
+  say(c.dim(`${s.t.year} day ${s.t.day} · part ${s.part} · ${s.lang.name} · ${custom ?? "input.txt"}`));
+  const res = await runReal(s, custom);
   showLog(res.log);
   if (!res.ok) {
     result({ ...s.t, part: s.part, lang: s.lang.id, ...res }, c.red(`✗ exit ${res.code}`));

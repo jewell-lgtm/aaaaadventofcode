@@ -58,7 +58,7 @@ async function main(argv: string[]) {
     case "test":
       return testCommand(await session(resolve(args, now), args));
     case "run":
-      return runCommand(await session(resolve(args, now), args));
+      return runCommand(await session(resolve(args, now), args), args.input);
     case "lang":
       return langCommand(resolve(args, now), args);
     case "ex":

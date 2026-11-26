@@ -1,3 +1,4 @@
+import { resolve } from "path";
 import type { Part } from "./store";
 
 export const COMMANDS = [
@@ -13,6 +14,8 @@ export interface Args {
   rest: string[];
   part?: Part;
   lang?: string;
+  /** `aoc run --input big.txt`: any file instead of input.txt (no answer comparison). */
+  input?: string;
   json: boolean;
   /** `aoc gallery …`: operate on gallery/ instead of solutions/. */
   gallery: boolean;
@@ -22,7 +25,7 @@ export interface Args {
 
 export class ArgError extends Error {}
 
-const VALUE_FLAGS = new Set(["--lang", "--part", "-p", "--year", "--day"]);
+const VALUE_FLAGS = new Set(["--lang", "--part", "-p", "--year", "--day", "--input", "-i"]);
 
 export function parseArgs(argv: string[]): Args {
   const a: Args = { command: "start", target: [], rest: [], json: false, gallery: false, yes: false, force: false };
@@ -41,6 +44,7 @@ export function parseArgs(argv: string[]): Args {
     }
     switch (arg) {
       case "--lang": a.lang = value; break;
+      case "--input": case "-i": a.input = resolve(value!); break;
       case "--part": case "-p": a.part = part(value!); break;
       case "--year": year = value; break;
       case "--day": day = value; break;
