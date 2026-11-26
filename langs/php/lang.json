@@ -1,0 +1,7 @@
+{
+  "name": "PHP",
+  "aliases": [],
+  "criteria": "Ordered hash-arrays for everything, preg_match_all and sscanf for parsing, SplPriorityQueue for Dijkstra, GMP-free bigints via strings only; pragmatic for parsing and map/set bookkeeping.",
+  "solution": { "1": "part1.php", "2": "part2.php" },
+  "run": "php main.php"
+}

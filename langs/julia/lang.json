@@ -1,0 +1,7 @@
+{
+  "name": "Julia",
+  "aliases": ["jl"],
+  "criteria": "1-based multidimensional arrays, broadcasting and CartesianIndex for grids, BigInt/Int128 built in, JIT-fast loops; good for numeric simulation and grid work once past ~0.4 s JIT startup.",
+  "solution": { "1": "part1.jl", "2": "part2.jl" },
+  "run": "julia --startup-file=no --history-file=no -O1 main.jl"
+}

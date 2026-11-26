@@ -1,0 +1,7 @@
+{
+  "name": "Lua",
+  "aliases": [],
+  "criteria": "Tiny language where tables are everything and string.gmatch patterns do the parsing; fine for straightforward simulation and hash-map counting, but you hand-roll heaps, sets and bigints.",
+  "solution": { "1": "part1.lua", "2": "part2.lua" },
+  "run": "lua5.4 main.lua"
+}

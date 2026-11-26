@@ -1,0 +1,7 @@
+{
+  "name": "Ruby",
+  "aliases": ["rb"],
+  "criteria": "Expressive Enumerable chains (each_cons, combination, tally, group_by, chunk_while), terse regex scan, native bignums; great for parse-and-transform puzzles and quick combinatorics.",
+  "solution": { "1": "part1.rb", "2": "part2.rb" },
+  "run": "ruby --disable-gems main.rb"
+}

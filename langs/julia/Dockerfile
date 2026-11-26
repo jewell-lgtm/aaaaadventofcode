@@ -1,0 +1,3 @@
+FROM julia:1.11
+ENV JULIA_PKG_OFFLINE=true
+WORKDIR /aoc

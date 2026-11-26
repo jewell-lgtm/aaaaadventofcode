@@ -1,0 +1,9 @@
+{
+  "name": "Dart",
+  "aliases": [],
+  "criteria": "Statically typed, null-safe with records, sealed classes and switch pattern matching, collection-for/if literals; AOT-compiled so tight loops are fast; nice for typed simulations and grid search.",
+  "solution": { "1": "part1.dart", "2": "part2.dart" },
+  "build": "mkdir -p .build && if [ ! -f .build/main ] || [ -n \"$(find . -name '*.dart' -newer .build/main)\" ]; then dart compile exe -o .build/main main.dart >/dev/null; fi",
+  "run": ".build/main",
+  "ignore": [".build/"]
+}

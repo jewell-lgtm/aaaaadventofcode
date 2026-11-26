@@ -1,0 +1,7 @@
+{
+  "name": "Perl",
+  "aliases": ["pl"],
+  "criteria": "Regex-first text munging with hashes everywhere; unbeatable for scanning/extracting from messy input and quick hash-based counting, weaker on heavy data structures.",
+  "solution": { "1": "Part1.pm", "2": "Part2.pm" },
+  "run": "perl -I. main.pl"
+}
