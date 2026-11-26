@@ -1,0 +1,16 @@
+{
+  "name": "Python",
+  "aliases": [
+    "py",
+    "python3"
+  ],
+  "criteria": "Batteries-included scripting: itertools, collections, heapq, functools.cache, arbitrary-precision ints; great for combinatorics, graph search, memoised recursion.",
+  "solution": {
+    "1": "part1.py",
+    "2": "part2.py"
+  },
+  "run": "python3 main.py",
+  "ignore": [
+    "__pycache__/"
+  ]
+}

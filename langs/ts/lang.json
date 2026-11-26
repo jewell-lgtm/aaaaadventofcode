@@ -1,0 +1,14 @@
+{
+  "name": "TypeScript",
+  "aliases": [
+    "typescript",
+    "bun",
+    "js"
+  ],
+  "criteria": "Quick general-purpose scripting with great string/array/Map/Set ergonomics and bigint; a safe default for parsing-heavy or simulation puzzles.",
+  "solution": {
+    "1": "part1.ts",
+    "2": "part2.ts"
+  },
+  "run": "bun main.ts"
+}

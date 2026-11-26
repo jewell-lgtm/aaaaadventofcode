@@ -1,0 +1,16 @@
+{
+  "name": "Haskell",
+  "aliases": [
+    "hs"
+  ],
+  "criteria": "Pure functional with algebraic data types, laziness and Data.Map/Set; shines on parsing grammars, recursive structures, folds over sequences, memoisation via laziness.",
+  "solution": {
+    "1": "Part1.hs",
+    "2": "Part2.hs"
+  },
+  "build": "mkdir -p .build && ghc -O2 -v0 -outputdir .build -o .build/main Main.hs",
+  "run": ".build/main",
+  "ignore": [
+    ".build/"
+  ]
+}

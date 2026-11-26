@@ -14,7 +14,6 @@ export interface Args {
   part?: Part;
   lang?: string;
   json: boolean;
-  native: boolean;
   yes: boolean;
   force: boolean;
 }
@@ -24,7 +23,7 @@ export class ArgError extends Error {}
 const VALUE_FLAGS = new Set(["--lang", "--part", "-p", "--year", "--day"]);
 
 export function parseArgs(argv: string[]): Args {
-  const a: Args = { command: "start", target: [], rest: [], json: false, native: false, yes: false, force: false };
+  const a: Args = { command: "start", target: [], rest: [], json: false, yes: false, force: false };
   const words: string[] = [];
   let year: string | undefined;
   let day: string | undefined;
@@ -44,7 +43,6 @@ export function parseArgs(argv: string[]): Args {
       case "--year": year = value; break;
       case "--day": day = value; break;
       case "--json": a.json = true; break;
-      case "--native": a.native = true; break;
       case "--yes": case "-y": a.yes = true; break;
       case "--force": case "-f": a.force = true; break;
       case "-h": case "--help": a.command = "help"; break;

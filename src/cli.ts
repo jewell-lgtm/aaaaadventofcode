@@ -4,6 +4,9 @@ import { ArgError, parseArgs, type Args } from "./args";
 import { start } from "./commands/start";
 import { status } from "./commands/status";
 import { help } from "./commands/help";
+import { runCommand, testCommand } from "./commands/test";
+import { langCommand, langsCommand } from "./commands/lang";
+import { session } from "./session";
 import { loadDay, loadGlobal, saveGlobal, targetFromPath, type Target } from "./store";
 import { parseTargetTokens, resolveTarget, TargetError } from "./target";
 import { c, result, setJson } from "./ui";
@@ -33,8 +36,19 @@ async function main(argv: string[]) {
       const t = resolve(args, now);
       return result(t, `${t.year} day ${t.day}`);
     }
-    case "start":
-      return start(resolve(args, now), args);
+    case "langs":
+      return langsCommand(args);
+    case "start": {
+      const t = resolve(args, now);
+      await start(t, args);
+      return testCommand(await session(t, args), { fallbackToReal: true });
+    }
+    case "test":
+      return testCommand(await session(resolve(args, now), args));
+    case "run":
+      return runCommand(await session(resolve(args, now), args));
+    case "lang":
+      return langCommand(resolve(args, now), args);
     default:
       throw new ArgError(`"${args.command}" isn't built yet`);
   }

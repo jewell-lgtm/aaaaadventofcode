@@ -26,7 +26,6 @@ COMMANDS
 FLAGS
   --lang X  (or AOC_LANG=X, or LANG=X if X is a bank lang)
   -p N | p1 | p2   part (default: first unsolved)
-  --native         run without docker
   --json           machine output (nvim plugin)
   -y               skip confirmations
 `;
