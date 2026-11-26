@@ -1,0 +1,8 @@
+{
+  "name": "Clojure",
+  "aliases": ["clj"],
+  "criteria": "Immutable maps/sets/vectors with threading macros, frequencies, group-by, partition, iterate and memoize, re-seq for parsing, arbitrary precision on overflow (+'); great for data-transformation pipelines and state-as-a-value simulations.",
+  "solution": { "1": "part1.clj", "2": "part2.clj" },
+  "run": "clojure -J-XX:+UseSerialGC -J-Xss512m -M -m main",
+  "ignore": [".cpcache/"]
+}

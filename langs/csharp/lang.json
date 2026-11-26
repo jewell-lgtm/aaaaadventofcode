@@ -1,0 +1,9 @@
+{
+  "name": "C#",
+  "aliases": ["cs", "dotnet", "c#"],
+  "criteria": "Statically typed .NET with LINQ pipelines, records, switch-expression pattern matching, tuples as dictionary keys, PriorityQueue<T,P>, spans and BigInteger; fast JIT-compiled loops for simulation, grids and graph search.",
+  "solution": { "1": "Part1.cs", "2": "Part2.cs" },
+  "build": "mkdir -p .build && { [ -e .build/ok ] && [ -z \"$(find . -maxdepth 1 -name '*.cs*' -newer .build/ok)\" ] || { touch .build/new && dotnet build -c Release -o .build/out --nologo -v q -clp:NoSummary && mv .build/new .build/ok; }; }",
+  "run": "dotnet .build/out/Aoc.dll",
+  "ignore": [".build/", "bin/", "obj/"]
+}

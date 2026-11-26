@@ -1,0 +1,9 @@
+{
+  "name": "Java",
+  "aliases": ["jdk"],
+  "criteria": "Fast JIT-compiled loops over primitive arrays plus records, sealed types with switch pattern matching, streams and java.util collections (PriorityQueue, ArrayDeque, TreeMap, BigInteger); solid for heavy simulation and graph search.",
+  "solution": { "1": "Part1.java", "2": "Part2.java" },
+  "build": "mkdir -p .build && { [ -e .build/ok ] && [ -z \"$(find . -maxdepth 1 -name '*.java' -newer .build/ok)\" ] || { touch .build/new && javac -d .build -Xlint:-options *.java && mv .build/new .build/ok; }; }",
+  "run": "java -XX:+UseSerialGC -Xss512m -cp .build Main",
+  "ignore": [".build/"]
+}

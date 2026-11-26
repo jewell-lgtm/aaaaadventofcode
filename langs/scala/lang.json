@@ -1,0 +1,9 @@
+{
+  "name": "Scala",
+  "aliases": ["scala3", "sc"],
+  "criteria": "Scala 3 on the JVM: case classes/enums with exhaustive pattern matching, immutable and mutable collections side by side (groupMapReduce, sliding, LazyList, PriorityQueue), BigInt; strong for parsing into ADTs, interpreters and graph search.",
+  "solution": { "1": "Part1.scala", "2": "Part2.scala" },
+  "build": "mkdir -p .build && { [ -e .build/ok ] && [ -z \"$(find . -maxdepth 1 -name '*.scala' -newer .build/ok)\" ] || { touch .build/new && scala-cli compile --print-class-path . > .build/cp && mv .build/new .build/ok; }; }",
+  "run": "java -XX:+UseSerialGC -Xss512m -cp \"$(cat .build/cp)\" Main",
+  "ignore": [".build/", ".scala-build/", ".bsp/"]
+}

@@ -1,0 +1,9 @@
+{
+  "name": "F#",
+  "aliases": ["fs", "f#"],
+  "criteria": "Functional-first .NET: discriminated unions with exhaustive match, pipelines over Seq/List/Map/Set, active patterns for parsing, tail recursion, plus mutable arrays and PriorityQueue when speed matters; good for parsing into ADTs, folds and expression trees.",
+  "solution": { "1": "Part1.fs", "2": "Part2.fs" },
+  "build": "mkdir -p .build && { [ -e .build/ok ] && [ -z \"$(find . -maxdepth 1 -name '*.fs*' -newer .build/ok)\" ] || { touch .build/new && dotnet build -c Release -o .build/out --nologo -v q -clp:NoSummary && mv .build/new .build/ok; }; }",
+  "run": "dotnet .build/out/Aoc.dll",
+  "ignore": [".build/", "bin/", "obj/"]
+}

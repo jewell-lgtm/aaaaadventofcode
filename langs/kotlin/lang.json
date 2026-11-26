@@ -1,0 +1,9 @@
+{
+  "name": "Kotlin",
+  "aliases": ["kt"],
+  "criteria": "Concise JVM language with a rich collections API (windowed, chunked, groupingBy, fold, sequences), data classes, when-expressions and java.util.PriorityQueue/ArrayDeque; good for parse-then-transform pipelines and grid or graph search at JIT speed.",
+  "solution": { "1": "Part1.kt", "2": "Part2.kt" },
+  "build": "mkdir -p .build && { [ -e .build/ok ] && [ -z \"$(find . -maxdepth 1 -name '*.kt' -newer .build/ok)\" ] || { touch .build/new && kotlinc -nowarn -d .build *.kt && mv .build/new .build/ok; }; }",
+  "run": "java -XX:+UseSerialGC -Xss512m -cp .build:/opt/kotlinc/lib/kotlin-stdlib.jar MainKt",
+  "ignore": [".build/"]
+}
