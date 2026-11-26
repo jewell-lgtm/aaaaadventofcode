@@ -13,6 +13,8 @@ export interface VerifyRow {
   expected: string;
   answer?: string;
   pass: boolean;
+  /** Language dir still returns the template's 0: an unfinished attempt, not a regression. */
+  todo?: boolean;
   ms: number;
 }
 
@@ -38,15 +40,23 @@ export async function verifyCommand(year: number | undefined, langFilter: string
                 return { ok: false, answer: undefined, ms: 0, log: String(e.message ?? e) };
               });
           const pass = res.answer === expected;
+          const todo = !pass && res.answer === "0";
           const why = pass ? "" : res.log.trim().split("\n").filter((l) => /error|exception|failed/i.test(l)).at(0) ?? res.log.trim().split("\n").at(-1) ?? "";
-          rows.push({ year: y, day: state.day, part, lang: lang.id, expected, answer: res.answer, pass, ms: res.ms });
+          rows.push({ year: y, day: state.day, part, lang: lang.id, expected, answer: res.answer, pass, todo, ms: res.ms });
+          if (todo) {
+            say(c.dim(`· ${y} ${String(state.day).padStart(2)} p${part} ${lang.id.padEnd(10)} not attempted (template 0)`));
+            continue;
+          }
           say(`${pass ? c.green("✓") : c.red("✗")} ${y} ${String(state.day).padStart(2)} p${part} ${lang.id.padEnd(10)} ${c.dim(`${res.ms.toFixed(0)}ms`)}${pass ? "" : `  want ${expected} got ${res.answer ?? c.red("error")}${res.answer ? "" : c.dim(`  ${why.trim().slice(0, 140)}`)}`}`);
         }
       }
     }
   }
-  const failed = rows.filter((r) => !r.pass).length;
-  result({ rows, pass: failed === 0 }, failed ? c.red(`${failed}/${rows.length} failing`) : c.green(`all ${rows.length} pass`));
+  const failed = rows.filter((r) => !r.pass && !r.todo).length;
+  const todo = rows.filter((r) => r.todo).length;
+  const checked = rows.length - todo;
+  const note = todo ? c.dim(`  (${todo} unattempted)`) : "";
+  result({ rows, pass: failed === 0 }, (failed ? c.red(`${failed}/${checked} failing`) : c.green(`all ${checked} pass`)) + note);
   if (failed) process.exitCode = 1;
 }
 

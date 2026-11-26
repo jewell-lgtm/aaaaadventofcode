@@ -287,7 +287,7 @@ function M.verify(fargs)
   M.cli(vim.list_extend({ 'verify' }, fargs or {}), function(r)
     local lines, qf = {}, {}
     for _, row in ipairs(r.rows) do
-      if not row.pass then
+      if not row.pass and not row.todo then
         table.insert(lines, ('✗ %d %2d p%d %-10s want %s got %s'):format(row.year, row.day, row.part, row.lang, row.expected, row.answer or 'error'))
         table.insert(qf, { filename = ('%s/solutions/%d/day%02d/%s'):format(M.config.root, row.year, row.day, row.lang), text = lines[#lines] })
       end
