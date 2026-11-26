@@ -1,0 +1,9 @@
+{
+  "name": "C++",
+  "aliases": ["c++", "cxx"],
+  "criteria": "Native speed with the STL: priority_queue, unordered_map/set, std::ranges, sort with lambdas, string_view slicing; strong for Dijkstra, custom comparators and heavy simulation. Verbose parsing and no big ints (use __int128 or modular arithmetic).",
+  "solution": { "1": "part1.cpp", "2": "part2.cpp" },
+  "build": "make -s",
+  "run": ".build/p$AOC_PART",
+  "ignore": [".build/"]
+}

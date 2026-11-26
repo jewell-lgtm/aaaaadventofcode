@@ -1,0 +1,2 @@
+FROM gcc:15.3
+WORKDIR /aoc

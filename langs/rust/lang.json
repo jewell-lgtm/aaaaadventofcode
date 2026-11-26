@@ -1,0 +1,10 @@
+{
+  "name": "Rust",
+  "aliases": ["rs", "cargo"],
+  "criteria": "Fast native code with enums + exhaustive match, iterator chains, HashMap/BinaryHeap/VecDeque in std and u128/i128; strong for Dijkstra, big simulations and parsed ASTs where speed and correctness matter. Borrow checker adds friction to graph mutation.",
+  "solution": { "1": "part1.rs", "2": "part2.rs" },
+  "build": "cargo build --release --offline -q",
+  "run": "target/release/main",
+  "caches": { "/usr/local/cargo/registry": "cargo-registry" },
+  "ignore": ["target/", "Cargo.lock"]
+}

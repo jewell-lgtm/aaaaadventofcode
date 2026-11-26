@@ -1,0 +1,10 @@
+{
+  "name": "Zig",
+  "aliases": [],
+  "criteria": "Explicit, fast systems code with comptime generics, tagged unions + switch, slices and std HashMap/PriorityQueue/ArrayList with explicit allocators; good for byte-level parsing and tight simulations. Verbose for string-heavy or recursive-collection puzzles; std API shifts between versions (pinned 0.15.2).",
+  "solution": { "1": "part1.zig", "2": "part2.zig" },
+  "build": "mkdir -p .build && { [ -f .build/main ] && [ -z \"$(find . -maxdepth 1 -name '*.zig' -newer .build/main)\" ]; } || zig build-exe -O ReleaseSafe main.zig -femit-bin=.build/main",
+  "run": ".build/main",
+  "caches": { "/root/.cache/zig": "zig" },
+  "ignore": [".build/", ".zig-cache/"]
+}

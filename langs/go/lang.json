@@ -1,0 +1,10 @@
+{
+  "name": "Go",
+  "aliases": ["golang"],
+  "criteria": "Plain, fast compiled code with slices, maps, structs and goroutines; good for straightforward simulations, grid BFS and brute force where explicit loops beat cleverness. No sets or generic containers beyond map, so heavy combinatorics gets verbose.",
+  "solution": { "1": "part1.go", "2": "part2.go" },
+  "build": "go build -o .build/main .",
+  "run": ".build/main",
+  "caches": { "/root/.cache/go-build": "go-build" },
+  "ignore": [".build/"]
+}

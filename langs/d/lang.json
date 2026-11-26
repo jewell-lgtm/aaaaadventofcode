@@ -1,0 +1,9 @@
+{
+  "name": "D",
+  "aliases": ["dlang", "ldc"],
+  "criteria": "Native speed with scripting ergonomics: UFCS range pipelines (splitter.map.filter.sum), built-in associative arrays and dynamic arrays, std.regex, std.bigint, compile-time templates; good for parsing + simulation puzzles that want both brevity and speed.",
+  "solution": { "1": "part1.d", "2": "part2.d" },
+  "build": "mkdir -p .build && { [ -f .build/main ] && [ -z \"$(find . -maxdepth 1 -name '*.d' -newer .build/main)\" ]; } || ldc2 -O2 -of=.build/main -od=.build *.d",
+  "run": ".build/main",
+  "ignore": [".build/"]
+}

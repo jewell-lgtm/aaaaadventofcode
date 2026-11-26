@@ -1,0 +1,13 @@
+[package]
+name = "solution"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name = "main"
+path = "main.rs"
+
+[dependencies]
+# Pre-fetched in the image (builds are --offline). Uncomment to use:
+# regex = "1"
+# itertools = "0.14"
