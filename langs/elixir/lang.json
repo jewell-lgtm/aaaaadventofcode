@@ -1,0 +1,9 @@
+{
+  "name": "Elixir",
+  "aliases": ["ex", "exs"],
+  "criteria": "Pipelines over Enum/Stream with binary pattern matching, Map/MapSet and native bignums; reads cleanly for parse-then-transform puzzles, frequency counting and record-style state machines.",
+  "solution": { "1": "part1.ex", "2": "part2.ex" },
+  "build": "[ -f .build/ok ] && [ -z \"$(find . -maxdepth 1 -name '*.ex' -newer .build/ok)\" ] || { rm -rf .build && mkdir -p .build && elixirc --ignore-module-conflict -o .build *.ex && touch .build/ok; }",
+  "run": "elixir -pa .build -e Main.main",
+  "ignore": [".build/"]
+}

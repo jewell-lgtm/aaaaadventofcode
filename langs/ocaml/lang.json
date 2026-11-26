@@ -1,0 +1,10 @@
+{
+  "name": "OCaml",
+  "aliases": ["ml"],
+  "criteria": "Strict functional with variants, exhaustive pattern matching and fast native code; good for parsing into ADTs, interpreters/expression trees, and search over immutable Map/Set at near-C speed.",
+  "solution": { "1": "part1.ml", "2": "part2.ml" },
+  "build": "dune build --root . --profile release --display quiet ./main.exe",
+  "run": "./_build/default/main.exe",
+  "caches": { "/home/opam/.cache/dune": "dune" },
+  "ignore": ["_build/"]
+}

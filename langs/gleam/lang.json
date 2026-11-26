@@ -1,0 +1,9 @@
+{
+  "name": "Gleam",
+  "aliases": ["gl"],
+  "criteria": "Statically typed functional language on the BEAM with custom types, exhaustive case/pattern matching, pipelines and use-callbacks, dicts/sets and bignums; good for parse-into-types puzzles and folds over immutable state, verbose for grid indexing.",
+  "solution": { "1": "src/part1.gleam", "2": "src/part2.gleam" },
+  "build": "gleam build --no-print-progress",
+  "run": "erl -noshell -pa build/dev/erlang/*/ebin -eval 'main:main(), halt().'",
+  "ignore": ["build/"]
+}

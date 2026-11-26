@@ -28,3 +28,19 @@ gallery/**/puzzle.*
 gallery/**/examples/
 solutions/**/examples/
 nvim/doc/tags
+
+# build outputs from any language dir (also listed per lang in langs/*/lang.json `ignore`)
+**/.build/
+**/_build/
+**/.bsp/
+**/.cpcache/
+**/.scala-build/
+**/.zig-cache/
+**/compiled/
+**/target/
+**/obj/
+**/__pycache__/
+gallery/**/bin/
+solutions/**/bin/
+gallery/**/build/
+solutions/**/build/

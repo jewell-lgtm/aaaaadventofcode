@@ -1,0 +1,9 @@
+{
+  "name": "Racket",
+  "aliases": ["rkt", "scheme"],
+  "criteria": "Scheme with match, for/fold comprehensions, immutable hashes/sets, regexps and exact bignums/rationals; good for recursive structures, symbolic expression trees and memoised recursion.",
+  "solution": { "1": "part1.rkt", "2": "part2.rkt" },
+  "build": "raco make main.rkt",
+  "run": "racket main.rkt",
+  "ignore": ["compiled/"]
+}

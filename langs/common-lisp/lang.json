@@ -1,0 +1,7 @@
+{
+  "name": "Common Lisp (SBCL)",
+  "aliases": ["cl", "lisp", "sbcl"],
+  "criteria": "SBCL compiles to fast native code with loop, hash tables, mutable arrays, bignums and cl-ppcre baked in; good for straightforward simulations, memoised search and regex-driven parsing with an imperative escape hatch.",
+  "solution": { "1": "part1.lisp", "2": "part2.lisp" },
+  "run": "sbcl --core /opt/aoc.core --script main.lisp"
+}

@@ -1,0 +1,16 @@
+{
+  "name": "Erlang",
+  "aliases": [
+    "erl"
+  ],
+  "criteria": "Function-clause pattern matching on tuples and binaries, maps, sets and bignums; good for parsing with binary patterns, recursive state machines and record-shaped simulations, less so for grid-heavy number crunching.",
+  "solution": {
+    "1": "part1.erl",
+    "2": "part2.erl"
+  },
+  "build": "[ -f .build/ok ] && [ -z \"$(find . -maxdepth 1 \\( -name '*.erl' -o -name '*.hrl' \\) -newer .build/ok)\" ] || { rm -rf .build && mkdir -p .build && erlc -o .build *.erl && touch .build/ok; }",
+  "run": "erl -noshell -pa .build -s main main",
+  "ignore": [
+    ".build/"
+  ]
+}

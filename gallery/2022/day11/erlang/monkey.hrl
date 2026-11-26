@@ -1,0 +1,1 @@
+-record(monkey, {op, divisor, on_true, on_false}).
