@@ -41,13 +41,16 @@ async function sh(cmd: string[], opts: { stdin?: string; cwd?: string; env?: Rec
 
 // --- docker -----------------------------------------------------------------
 
+/** Image identity: Dockerfile + build context. lang.json (run/build commands) doesn't need a rebuild;
+ *  template/ only counts when the Dockerfile COPYs it to warm caches. */
 function langHash(lang: Lang): string {
   const h = createHash("sha256");
   const dir = join(LANGS_DIR, lang.id);
+  const copiesTemplate = /COPY\s+(\.\/)?template/.test(readFileSync(join(dir, "Dockerfile"), "utf8"));
   const walk = (d: string) => {
     for (const name of readdirSync(d).sort()) {
       const p = join(d, name);
-      if (name === "template" && d === dir) continue;
+      if (d === dir && (name === "lang.json" || (name === "template" && !copiesTemplate))) continue;
       if (statSync(p).isDirectory()) walk(p);
       else h.update(relative(dir, p)).update(readFileSync(p));
     }
@@ -70,7 +73,12 @@ async function ensureContainer(lang: Lang): Promise<string> {
   const img = await sh(["docker", "image", "inspect", image]);
   if (img.code !== 0) {
     say(c.dim(`🐳 building ${image} (first use of ${lang.name}, this can take a few minutes)…`));
-    const built = await sh(["docker", "build", "--progress=plain", "-t", image, "-t", `aoc-${lang.id}:latest`, join(LANGS_DIR, lang.id)]);
+    let built = await sh(["docker", "build", "--progress=plain", "-t", image, "-t", `aoc-${lang.id}:latest`, join(LANGS_DIR, lang.id)]);
+    for (let wait = 15; built.code !== 0 && /429|Too Many Requests|toomanyrequests/i.test(built.stdout + built.stderr) && wait <= 120; wait *= 2) {
+      say(c.yellow(`🐳 registry rate limit, retrying in ${wait}s (docker login raises the limit)`));
+      await Bun.sleep(wait * 1000);
+      built = await sh(["docker", "build", "--progress=plain", "-t", image, "-t", `aoc-${lang.id}:latest`, join(LANGS_DIR, lang.id)]);
+    }
     if (built.code !== 0) throw new BuildError(lang.id, `docker build failed:\n${(built.stdout + built.stderr).split("\n").slice(-40).join("\n")}`);
   }
   const volumes = Object.entries(lang.caches ?? {}).flatMap(([path, vol]) => ["-v", `aoc-cache-${vol}:${path}`]);
@@ -89,7 +97,7 @@ function containerCwd(dir: string): string {
 // --- public -----------------------------------------------------------------
 
 export interface Runner {
-  build(): Promise<void>;
+  build(part: Part): Promise<void>;
   run(input: string, env: RunEnv): Promise<RunResult>;
 }
 
@@ -108,9 +116,9 @@ export async function runner(lang: Lang, dir: string): Promise<Runner> {
   };
 
   return {
-    async build() {
+    async build(part) {
       if (!lang.build) return;
-      const r = await exec(lang.build);
+      const r = await exec(lang.build, { env: { AOC_PART: String(part) } });
       if (r.code !== 0) throw new BuildError(lang.id, r.stdout + r.stderr);
     },
     async run(input, env) {

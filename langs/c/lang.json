@@ -1,9 +1,16 @@
 {
   "name": "C",
-  "aliases": ["c23"],
+  "aliases": [
+    "c23"
+  ],
   "criteria": "Raw speed and total control: fixed-size arrays indexed by encoded keys, in-place string scanning with pointers, hand-rolled heaps; great for grids and brute-force simulation with small, known bounds. No containers or big ints, so maps/sets and string-heavy parsing cost real code.",
-  "solution": { "1": "part1.c", "2": "part2.c" },
-  "build": "make -s",
+  "solution": {
+    "1": "part1.c",
+    "2": "part2.c"
+  },
+  "build": "make -s .build/p$AOC_PART",
   "run": ".build/p$AOC_PART",
-  "ignore": [".build/"]
+  "ignore": [
+    ".build/"
+  ]
 }

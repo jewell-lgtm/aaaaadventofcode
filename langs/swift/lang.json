@@ -6,7 +6,7 @@
     "1": "Part1.swift",
     "2": "Part2.swift"
   },
-  "build": "mkdir -p .build && for p in 1 2; do [ .build/p$p -nt Part$p.swift ] && [ .build/p$p -nt Aoc.swift ] && [ .build/p$p -nt main.swift ] || swiftc -O -swift-version 6 -module-cache-path .build/cache main.swift Aoc.swift Part$p.swift -o .build/p$p || exit 1; done",
+  "build": "mkdir -p .build && for p in $AOC_PART; do [ .build/p$p -nt Part$p.swift ] && [ .build/p$p -nt Aoc.swift ] && [ .build/p$p -nt main.swift ] || swiftc -O -swift-version 6 -module-cache-path .build/cache main.swift Aoc.swift Part$p.swift -o .build/p$p || exit 1; done",
   "run": ".build/p$AOC_PART",
   "ignore": [
     ".build/"

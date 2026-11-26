@@ -52,6 +52,6 @@ export async function session(t: Target, args: Args): Promise<Session> {
 
 export async function prepared(s: Session): Promise<Runner> {
   const r = await runner(s.lang, s.dir);
-  await r.build();
+  await r.build(s.part);
   return r;
 }
