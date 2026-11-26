@@ -14,7 +14,7 @@ Each language is a folder `langs/<id>/`. The harness (`src/`) is language-agnost
   - `run`: shell. Reads the puzzle input from stdin.
   - `caches`: optional `{ "<container path>": "<volume name>" }` for package or build caches (e.g. `/root/.gradle`). The volume becomes `aoc-cache-<name>`, shared across days.
   - `ignore`: build outputs to gitignore inside the day dir (e.g. `["target/", ".build/"]`).
-- `Dockerfile`: `FROM` an official or well-maintained image, **version pinned** (exact or minor tag; check it exists on Docker Hub, arm64 + amd64). Install everything the template needs at image build time (dependencies, warmed caches) so the first run doesn't download. `WORKDIR /aoc`. No ENTRYPOINT. The harness runs `sleep infinity` and then `docker exec`.
+- `Dockerfile`: `FROM` an official or well-maintained image, **version pinned** (exact or minor tag, arm64 + amd64). Docker Hub, ghcr.io (e.g. gleam) and mcr.microsoft.com (.NET) are all fine. If the official image is amd64-only (racket, scala-cli), use a pinned distro base (`debian:trixie-slim`) plus distro packages or a pinned binary. Install everything the template needs at image build time (dependencies, warmed caches) so the first run doesn't download. `WORKDIR /aoc`. No ENTRYPOINT. The harness runs `sleep infinity` and then `docker exec`.
 - `template/`: copied to `solutions/YYYY/dayDD/<id>/` once per day. `{{year}} {{day}} {{dd}}` get substituted in text files.
 
 ## Runtime contract
