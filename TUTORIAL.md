@@ -132,7 +132,7 @@ Open nvim anywhere and press `<leader>aa`. The solution opens with `puzzle.md` i
 Not sure whether Elixir or OCaml would be nicer for a parsing-heavy day? The gallery has 10 classic puzzles solved in all 32 languages:
 
 ```
-<leader>ag              then type "chiton" or "rust" to filter. <C-v> vsplit, so open two and compare
+<leader>ag              (snacks picker) then type "chiton" or "rust" to filter. <C-v> vsplit, so open two and compare
 :AocGallery ocaml
 ```
 

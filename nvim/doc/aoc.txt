@@ -91,7 +91,7 @@ is true while testing.
 6. GALLERY                                                        *aoc-gallery*
 
 machine-gallery/ has 10 classic puzzles solved in every bank language. `:AocGallery`
-opens a telescope picker. <CR> opens part 1, <C-t> part 2, and <C-v> opens it
+opens a picker (snacks, else telescope, else vim.ui.select). <CR> opens part 1, <C-t> part 2, and <C-v> opens it
 in a vsplit so you can line up languages. Filter by language or title:
 `:AocGallery rust`, `:AocGallery chiton`.
 

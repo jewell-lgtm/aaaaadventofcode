@@ -91,7 +91,7 @@ aoc gallery test 2022 12 --lang ocaml
 aoc gallery verify            # needs inputs: aoc gallery start <year> <day> fetches them
 ```
 
-In nvim, `<leader>ag` opens a telescope picker (`<C-v>` vsplit to compare).
+In nvim, `<leader>ag` opens a picker (snacks; `<C-v>` vsplit to compare).
 
 ## Commands
 

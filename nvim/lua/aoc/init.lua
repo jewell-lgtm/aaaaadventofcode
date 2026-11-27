@@ -330,6 +330,29 @@ function M.gallery(fargs)
       end
     end
   end
+  if _G.Snacks and Snacks.picker then
+    local items = {}
+    for _, e in ipairs(entries) do
+      table.insert(items, { text = e.display, file = e.file, part2 = e.file2 })
+    end
+    return Snacks.picker {
+      title = 'AoC gallery (🤖 agent-written): <CR> part 1 · <C-t> part 2',
+      items = items,
+      format = 'text',
+      preview = 'file',
+      confirm = function(picker, item)
+        picker:close()
+        if item then vim.cmd.edit(item.file) end
+      end,
+      actions = {
+        part2 = function(picker, item)
+          picker:close()
+          if item then vim.cmd.edit(item.part2) end
+        end,
+      },
+      win = { input = { keys = { ['<C-t>'] = { 'part2', mode = { 'i', 'n' } } } } },
+    }
+  end
   local ok, pickers = pcall(require, 'telescope.pickers')
   if not ok then
     return vim.ui.select(entries, { prompt = 'gallery', format_item = function(e) return e.display end }, function(e)
