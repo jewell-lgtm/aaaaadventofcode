@@ -182,6 +182,7 @@ function M.read()
     return
   end
   vim.cmd('tabnew ' .. esc(info.puzzle))
+  vim.cmd 'tabmove 0' -- fixed order: 1 read · 2 code · 3 run
   tabs.read = vim.api.nvim_get_current_tabpage()
   local puzzle = vim.api.nvim_get_current_win()
   read_only { wrap = true }
@@ -216,8 +217,42 @@ function M.code()
   end
 end
 
+--- Run mode: a terminal tab running `aoc watch` (examples rerun on every save), last in the tab order.
+function M.exec()
+  local info = state.info
+  if not info then
+    return M.open {}
+  end
+  local tabs = day_tabs(info)
+  state.mode = 'exec'
+  if valid(tabs.exec) and tabs.exec_part == info.part then
+    vim.api.nvim_set_current_tabpage(tabs.exec)
+    vim.cmd 'startinsert' -- follow the output
+    return
+  end
+  if valid(tabs.exec) then
+    -- Part changed since the watcher started: restart it for the new part.
+    vim.api.nvim_set_current_tabpage(tabs.exec)
+    vim.cmd 'enew'
+  else
+    vim.cmd '$tabnew'
+    tabs.exec = vim.api.nvim_get_current_tabpage()
+  end
+  tabs.exec_part = info.part
+  vim.fn.jobstart({ M.config.cmd, 'watch', 'p' .. info.part }, { term = true, cwd = info.dir })
+  vim.bo.bufhidden = 'wipe'
+  vim.cmd 'startinsert'
+end
+
+--- read → code → run → read
 function M.toggle()
-  if state.mode == 'read' then M.code() else M.read() end
+  if state.mode == 'read' then
+    M.code()
+  elseif state.mode == 'code' then
+    M.exec()
+  else
+    M.read()
+  end
 end
 
 --- Untouched template = you haven't started this part.
@@ -519,6 +554,13 @@ function M.setup(opts)
     end,
   })
   -- Agent-written reference code: read-only, labelled, never mistaken for yours.
+  vim.api.nvim_create_autocmd('TabEnter', {
+    group = group,
+    callback = function()
+      local t, tabs = vim.api.nvim_get_current_tabpage(), state.tabs
+      state.mode = t == tabs.read and 'read' or t == tabs.code and 'code' or t == tabs.exec and 'exec' or state.mode
+    end,
+  })
   vim.api.nvim_create_autocmd('BufReadPost', {
     group = group,
     pattern = M.config.root .. '/machine-gallery/*',
@@ -555,7 +597,8 @@ function M.setup(opts)
     map('<leader>at', function() M.test {} end, '[A]oC: [t]est examples')
     map('<leader>ar', function() M.run {} end, '[A]oC: [r]un real input')
     map('<leader>as', function() M.submit {} end, '[A]oC: [s]ubmit')
-    map('<leader>am', M.toggle, '[A]oC: toggle reading/coding [m]ode')
+    map('<leader>am', M.toggle, '[A]oC: cycle [m]ode read → code → run')
+    map('<leader>ax', function() M.exec() end, '[A]oC: e[x]ecute (aoc watch tab)')
     map('<leader>ap', function() M.read() end, '[A]oC: [p]uzzle (reading mode)')
     map('<leader>ac', function() M.code() end, '[A]oC: [c]oding mode')
     map('<leader>ae', M.examples, '[A]oC: [e]xamples.toml')

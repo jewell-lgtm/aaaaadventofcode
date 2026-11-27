@@ -19,11 +19,14 @@ CONTENTS                                                         *aoc-contents*
 
   <leader>aa   open today's puzzle (or the day of the current buffer)
                → fetches puzzle + input, JEV picks a language, scaffolds,
-                 and opens two tabs (Tab / S-Tab or <leader>am to switch):
-                   coding tab   your partN solution, nothing else
-                   reading tab  puzzle.md │ example (examples.toml for
-                                          │ inline ones) over input.txt
-                 A part you haven't started opens on the reading tab.
+                 and opens tabs in a fixed order (Tab / S-Tab, Ngt, or
+                 <leader>am to cycle read → code → run):
+                   1 read  puzzle.md │ example (examples.toml for inline
+                                     │ ones) over input.txt
+                   2 code  your partN solution, nothing else
+                   3 run   terminal running `aoc watch`: examples rerun on
+                           every save (<leader>ax opens it)
+                 A part you haven't started opens on the read tab.
   <leader>at   test against the examples (float; failures → quickfix,
                jumping to the example in examples.toml)
   <leader>ar   run against your real input (answer copied to +)
@@ -45,7 +48,8 @@ last day you touched.
 :AocSubmit [p1|p2]     Submit with confirmation.                  *:AocSubmit*
 :AocPuzzle [-f]        Reading tab; -f refetches the puzzle.      *:AocPuzzle*
 :AocRead / :AocCode    Reading / coding tab.                         *:AocRead*
-:AocMode               Toggle between them.                          *:AocMode*
+:AocExec               Run tab (`aoc watch` terminal).               *:AocExec*
+:AocMode               Cycle read → code → run.                      *:AocMode*
 :AocNext [year]        Newest released day you haven't started.     *:AocNext*
 :AocLang [id|repick]   Show / switch language / ask JEV again.      *:AocLang*
 :AocWatch              Toggle test-on-save.                        *:AocWatch*
@@ -57,7 +61,8 @@ last day you touched.
 3. KEYMAPS                                                        *aoc-keymaps*
 
   <leader>aa  open            <leader>am  toggle reading/coding
-  <leader>ap  reading tab     <leader>ac  coding tab
+  <leader>ap  read tab        <leader>ac  code tab
+  <leader>ax  run tab
   <leader>an  next            <leader>ae  examples.toml
   <leader>at  test            <leader>aw  toggle test on save
   <leader>ar  run             <leader>al  re-pick language (JEV)

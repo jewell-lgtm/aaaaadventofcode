@@ -24,6 +24,7 @@ cmd('Aoc', function(args)
   if sub == 'puzzle' then return m.puzzle(rest[1] == '-f') end
   if sub == 'read' then return m.read() end
   if sub == 'code' then return m.code() end
+  if sub == 'run' or sub == 'exec' then return m.exec() end
   if sub == 'examples' then return m.examples() end
   if sub == 'watch' then return m.watch() end
   if m[sub] then return m[sub](rest) end
@@ -42,6 +43,7 @@ cmd('AocSubmit', function(a) aoc().submit(a) end)
 cmd('AocPuzzle', function(a) aoc().puzzle(a[1] == '-f') end)
 cmd('AocRead', function() aoc().read() end, { nargs = 0 })
 cmd('AocCode', function() aoc().code() end, { nargs = 0 })
+cmd('AocExec', function() aoc().exec() end, { nargs = 0 })
 cmd('AocMode', function() aoc().toggle() end, { nargs = 0 })
 cmd('AocNext', function(a) aoc().open(vim.list_extend({ 'next' }, a)) end)
 cmd('AocStatus', function(a) aoc().status(a) end)
