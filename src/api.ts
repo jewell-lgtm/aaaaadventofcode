@@ -26,7 +26,8 @@ function headers(): Record<string, string> {
   }
   return {
     Cookie: `session=${session}`,
-    "User-Agent": env("AOC_USER_AGENT") ?? "aaaaadventofcode-cli",
+    // AoC's automation guidelines ask for contact info; the repo URL is enough and keeps email out of requests.
+    "User-Agent": env("AOC_USER_AGENT") ?? "github.com/jewell-lgtm/aaaaadventofcode (aoc cli)",
   };
 }
 
