@@ -30,7 +30,11 @@ Two entry points, nothing else to remember:
                  2 code  your partN solution, nothing else
                  3 exec  terminal running `aoc watch`: examples rerun on
                          every save (opened on demand)
-               A part you haven't started opens on the read tab.
+               All three tabs are always built; a part you haven't started
+               (still the template, or part 2 still a copy of part 1) lands
+               on read, otherwise code. Starting nvim on a file inside
+               solutions/YYYY/dayDD/ builds the layout by itself
+               (opts.auto_open = false to disable).
   test         examples → float; failures → quickfix (:cnext jumps to the
                failing [[example]])
   run          real input (answer copied to +)

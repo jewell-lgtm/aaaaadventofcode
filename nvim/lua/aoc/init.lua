@@ -158,14 +158,16 @@ local function tiled(tab)
   end, vim.api.nvim_tabpage_list_wins(tab))
 end
 
---- The current tab can host the coding layout if it's a fresh nvim: one empty buffer or a dashboard.
-local function reusable_tab()
+--- The current tab can host the coding layout if it's a fresh nvim (one empty buffer or a dashboard)
+--- or it's just showing a file from this day, e.g. `nvim solutions/2015/day01/python/part2.py`.
+local function reusable_tab(info)
   local wins = tiled(0)
   local buf = wins[1] and vim.api.nvim_win_get_buf(wins[1])
   if #wins ~= 1 or vim.bo[buf].modified then
     return false
   end
-  return vim.api.nvim_buf_get_name(buf) == '' or vim.bo[buf].filetype:match 'dashboard' ~= nil
+  local name = vim.api.nvim_buf_get_name(buf)
+  return name == '' or vim.bo[buf].filetype:match 'dashboard' ~= nil or vim.startswith(name, vim.fs.dirname(info.dir) .. '/')
 end
 
 --- Reading mode: puzzle on the left; example above the real input on the right.
@@ -206,7 +208,7 @@ function M.code()
   state.mode = 'code'
   if valid(tabs.code) then
     vim.api.nvim_set_current_tabpage(tabs.code)
-  elseif reusable_tab() and not (valid(tabs.read) and vim.api.nvim_get_current_tabpage() == tabs.read) then
+  elseif reusable_tab(info) and not (valid(tabs.read) and vim.api.nvim_get_current_tabpage() == tabs.read) then
     tabs.code = vim.api.nvim_get_current_tabpage()
   else
     vim.cmd 'tabnew'
@@ -218,14 +220,20 @@ function M.code()
 end
 
 --- Run mode: a terminal tab running `aoc watch` (examples rerun on every save), last in the tab order.
-function M.exec()
+--- `opts.background`: create/refresh it without leaving the current tab.
+function M.exec(opts)
+  opts = opts or {}
+  local from = vim.api.nvim_get_current_tabpage()
   local info = state.info
   if not info then
     return M.open {}
   end
   local tabs = day_tabs(info)
-  state.mode = 'exec'
   if valid(tabs.exec) and tabs.exec_part == info.part then
+    if opts.background then
+      return
+    end
+    state.mode = 'exec'
     vim.api.nvim_set_current_tabpage(tabs.exec)
     vim.cmd 'startinsert' -- follow the output
     return
@@ -241,7 +249,12 @@ function M.exec()
   tabs.exec_part = info.part
   vim.fn.jobstart({ M.config.cmd, 'watch', 'p' .. info.part }, { term = true, cwd = info.dir })
   vim.bo.bufhidden = 'wipe'
-  vim.cmd 'startinsert'
+  if opts.background then
+    vim.api.nvim_set_current_tabpage(from)
+  else
+    state.mode = 'exec'
+    vim.cmd 'startinsert'
+  end
 end
 
 --- read → code → run → read
@@ -255,12 +268,20 @@ function M.toggle()
   end
 end
 
---- Untouched template = you haven't started this part.
+local function same_file(a, b)
+  local ok1, x = pcall(vim.fn.readfile, a)
+  local ok2, y = pcall(vim.fn.readfile, b)
+  return ok1 and ok2 and table.concat(x, '\n') == table.concat(y, '\n')
+end
+
+--- You've started a part once its file differs from the template, and for part 2 also from the
+--- part 1 copy it starts as (you haven't read part 2 until you've changed something).
 local function started(info)
   local p = tostring(info.part)
-  local ok1, mine = pcall(vim.fn.readfile, info.solution[p])
-  local ok2, tmpl = pcall(vim.fn.readfile, info.template[p])
-  return not (ok1 and ok2) or table.concat(mine, '\n') ~= table.concat(tmpl, '\n')
+  if same_file(info.solution[p], info.template[p]) then
+    return false
+  end
+  return not (info.part == 2 and same_file(info.solution['2'], info.solution['1']))
 end
 
 --- :Aoc [target]: start/resume a day. Coding tab first (Tab/S-Tab switch), reading tab on top if you haven't started.
@@ -271,9 +292,12 @@ function M.open(fargs)
     if mode == 'auto' then
       mode = started(info) and 'code' or 'read'
     end
+    -- Always build all three tabs (1 read · 2 code · 3 exec), then land on the right one.
     M.code()
-    if mode == 'read' then
-      M.read()
+    M.read()
+    M.exec { background = true }
+    if mode == 'code' then
+      M.code()
     end
     notify(('%d day %d%s · part %d · %s%s'):format(info.year, info.day, info.title and (': ' .. info.title) or '', info.part, info.langName, info.langReason and ('\n' .. info.langReason) or ''))
   end)
@@ -581,6 +605,15 @@ end
 
 function M.setup(opts)
   M.config = vim.tbl_deep_extend('force', M.config, opts or {})
+  -- `nvim solutions/2015/day01/python/part1.py` (or a session restoring one): build the layout.
+  if M.config.auto_open ~= false then
+    vim.schedule(function()
+      local file = vim.api.nvim_buf_get_name(0)
+      if file:match('^' .. vim.pesc(M.config.root) .. '/solutions/%d%d%d%d/day%d%d/') then
+        M.open {}
+      end
+    end)
+  end
   -- Local `dir` plugins get no helptags from lazy; build them so :help aoc works.
   local doc = vim.fn.fnamemodify(debug.getinfo(1, 'S').source:sub(2), ':h:h:h') .. '/doc'
   if vim.fn.filereadable(doc .. '/tags') == 0 or vim.fn.getftime(doc .. '/aoc.txt') > vim.fn.getftime(doc .. '/tags') then
