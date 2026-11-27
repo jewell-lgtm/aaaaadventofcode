@@ -37,7 +37,7 @@ aoc run        # real input
 aoc submit     # run + submit + record verdict; on ⭐, fetch part 2 and commit
 ```
 
-Inside nvim: `<leader>aa` open, `<leader>at` test, `<leader>ar` run, `<leader>as` submit (`:help aoc`).
+Inside nvim: `<leader>a` opens a picker of every action; `:Aoc <sub>` does the same (`:help aoc`).
 
 ## Targets
 
@@ -91,7 +91,7 @@ aoc gallery test 2022 12 --lang ocaml
 aoc gallery verify            # needs inputs: aoc gallery start <year> <day> fetches them
 ```
 
-In nvim, `<leader>ag` opens a picker (snacks; `<C-v>` vsplit to compare).
+In nvim: `:Aoc gallery [filter]` (snacks picker; `<C-v>` vsplit to compare).
 
 ## Commands
 

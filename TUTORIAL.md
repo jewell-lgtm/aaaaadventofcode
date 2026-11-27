@@ -111,29 +111,27 @@ Inside a day dir (`cd solutions/2017/day03/ts`), every command targets that day.
 
 ## 7. Same thing in nvim
 
-Open nvim anywhere and press `<leader>aa`. The solution opens with `puzzle.md` in a split on the right.
+You don't need to memorise anything: `<leader>a` opens a picker of every action (type `sub` ⏎ to submit), and `:Aoc <Tab>` completes the same set.
 
-| keys | |
-|---|---|
-| `<leader>at` | test. Results appear in a float, and failures go to the quickfix list (`:cnext` jumps to the failing `[[example]]`) |
-| `<leader>ar` | run on real input. The answer is also copied to the clipboard |
-| `<leader>as` | submit. Dry run, a confirm prompt, then a notification with the verdict. On ⭐ the puzzle split refreshes with part 2 |
-| `<leader>aw` | toggle test-on-save |
-| `<leader>ap` / `<leader>ae` | puzzle / examples.toml |
-| `<leader>al` | re-pick the language with JEV |
-| `<leader>an` | next unstarted day |
-| `<leader>ag` | gallery |
-| `<leader>a*` | stars |
+`:Aoc` opens the day in three tabs, in a fixed order (Tab / Shift+Tab or `1gt` `2gt` `3gt` to switch):
 
-`:Aoc 2017 3`, `:Aoc test p2`, `:Aoc next` and friends take the same arguments as the CLI. See `:help aoc` for the rest.
+| tab | | |
+|---|---|---|
+| 1 read | puzzle.md │ example over input.txt | where a fresh part opens |
+| 2 code | your solution, nothing else | where you work |
+| 3 exec | terminal running `aoc watch` | examples rerun on every save |
+
+`:Aoc test` shows a float, and failures go to the quickfix list (`:cnext` jumps to the failing `[[example]]`). `:Aoc run` copies the answer to the clipboard. `:Aoc submit` does a dry run, asks for confirmation, and on ⭐ refreshes the read tab with part 2.
+
+See `:help aoc` for the rest.
 
 ## 8. Choosing a language: the gallery
 
 Not sure whether Elixir or OCaml would be nicer for a parsing-heavy day? The gallery has 10 classic puzzles solved in all 32 languages:
 
 ```
-<leader>ag              (snacks picker) then type "chiton" or "rust" to filter. <C-v> vsplit, so open two and compare
-:AocGallery ocaml
+:Aoc gallery             snacks picker: type "chiton" or "rust" to filter, <C-v> vsplit to compare two
+:Aoc gallery ocaml
 ```
 
 | puzzle | shows off |

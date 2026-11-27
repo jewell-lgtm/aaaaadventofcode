@@ -5,7 +5,7 @@ local M = {}
 M.config = {
   cmd = 'aoc',
   root = vim.fn.expand '~/Code/jewell-lgtm/aaaaadventofcode',
-  test_on_save = false, -- toggle with :AocWatch
+  test_on_save = false, -- toggle with :Aoc watch
   -- :Aoc opens the reading tab for a part you haven't started, the coding tab once you have.
   -- 'auto' | 'read' | 'code'
   open_mode = 'auto',
@@ -292,7 +292,7 @@ function M.test(fargs)
     local lines = {}
     local qf = {}
     if not r.examples or #r.examples == 0 then
-      notify(('No part %d examples with expected answers. Edit examples.toml (:AocExamples)'):format(r.part), vim.log.levels.WARN)
+      notify(('No part %d examples with expected answers. Edit examples.toml (:Aoc examples)'):format(r.part), vim.log.levels.WARN)
       return
     end
     for _, e in ipairs(r.examples) do
@@ -327,7 +327,7 @@ function M.run(fargs)
   M.cli(vim.list_extend({ 'run' }, fargs or {}), function(r)
     local lines = {}
     log_lines(r.log, lines)
-    local verdict = r.match == true and '✓ matches accepted answer' or r.match == false and ('✗ accepted answer is ' .. r.accepted) or 'unsubmitted, :AocSubmit'
+    local verdict = r.match == true and '✓ matches accepted answer' or r.match == false and ('✗ accepted answer is ' .. r.accepted) or 'unsubmitted, :Aoc submit'
     table.insert(lines, 1, ('⭐ %s   %s   %s'):format(r.answer or ('exit ' .. r.code), ms(r.ms or 0), verdict))
     vim.fn.setreg('+', r.answer or '')
     float(lines, ('%d/%d part %d · input.txt'):format(r.year, r.day, r.part), r.match == false and 'DiagnosticError' or nil)
@@ -349,7 +349,7 @@ function M.submit(fargs)
       end
       M.cli(vim.list_extend({ 'submit', '-y' }, fargs or {}), function(s)
         local msgs = {
-          correct = '⭐ correct!' .. (s.part == 1 and ' Part 2 is unlocked (:AocPuzzle)' or ''),
+          correct = '⭐ correct!' .. (s.part == 1 and ' Part 2 is unlocked' or ''),
           done = 'already solved on the site',
           high = '✗ too high',
           low = '✗ too low',
@@ -429,7 +429,7 @@ function M.verify(fargs)
   end)
 end
 
---- Toggle: run :AocTest on every save inside a solutions day dir.
+--- Toggle: run :Aoc test on every save inside a solutions day dir.
 function M.watch()
   state.watch = not state.watch
   notify('test on save ' .. (state.watch and 'on' or 'off'))
@@ -520,6 +520,43 @@ function M.gallery(fargs)
     :find()
 end
 
+-- ── menu: the one keymap ─────────────────────────────────────────────────
+
+--- Every action in one picker (vim.ui.select, so snacks/telescope styling applies). Most useful first.
+M.actions = {
+  { 'test examples', function() M.test {} end },
+  { 'run real input', function() M.run {} end },
+  { 'submit', function() M.submit {} end },
+  { 'read tab: puzzle · example · input', function() M.read() end },
+  { 'code tab: solution', function() M.code() end },
+  { 'run tab: aoc watch', function() M.exec() end },
+  { 'open today / this day', function() M.open {} end },
+  { 'next unattempted day', function() M.open { 'next' } end },
+  { 'examples.toml', function() M.examples() end },
+  { 'refetch puzzle (part 2)', function() M.puzzle(true) end },
+  { 'language: re-pick with JEV', function() M.lang { 'repick' } end },
+  { 'language: choose…', function()
+    vim.ui.input({ prompt = 'language id: ' }, function(id)
+      if id and id ~= '' then M.lang { id } end
+    end)
+  end },
+  { 'toggle test on save', function() M.watch() end },
+  { 'stars', function() M.status() end },
+  { 'verify all solved parts', function() M.verify() end },
+  { 'gallery 🤖', function() M.gallery() end },
+}
+
+function M.menu()
+  local i = state.info
+  local prompt = i and ('aoc · %d day %d · part %d · %s'):format(i.year, i.day, i.part, i.lang) or 'aoc'
+  vim.ui.select(M.actions, {
+    prompt = prompt,
+    format_item = function(a) return a[1] end,
+  }, function(choice)
+    if choice then choice[2]() end
+  end)
+end
+
 -- ── statusline ─────────────────────────────────────────────────────────────
 
 --- `2026·d03·rust ★☆` for the day of the current buffer. Empty outside solutions/.
@@ -589,26 +626,10 @@ function M.setup(opts)
   })
 
   if M.config.keys then
-    local map = function(lhs, fn, desc)
-      vim.keymap.set('n', lhs, fn, { desc = desc })
-    end
-    map('<leader>aa', function() M.open {} end, '[A]oC: open today / current')
-    map('<leader>an', function() M.open { 'next' } end, '[A]oC: [n]ext unattempted')
-    map('<leader>at', function() M.test {} end, '[A]oC: [t]est examples')
-    map('<leader>ar', function() M.run {} end, '[A]oC: [r]un real input')
-    map('<leader>as', function() M.submit {} end, '[A]oC: [s]ubmit')
-    map('<leader>am', M.toggle, '[A]oC: cycle [m]ode read → code → run')
-    map('<leader>ax', function() M.exec() end, '[A]oC: e[x]ecute (aoc watch tab)')
-    map('<leader>ap', function() M.read() end, '[A]oC: [p]uzzle (reading mode)')
-    map('<leader>ac', function() M.code() end, '[A]oC: [c]oding mode')
-    map('<leader>ae', M.examples, '[A]oC: [e]xamples.toml')
-    map('<leader>aw', M.watch, '[A]oC: toggle test on save ([w]atch)')
-    map('<leader>al', function() M.lang { 'repick' } end, '[A]oC: re-pick [l]anguage')
-    map('<leader>ag', function() M.gallery() end, '[A]oC: [g]allery')
-    map('<leader>a*', function() M.status() end, '[A]oC: stars')
+    vim.keymap.set('n', '<leader>a', M.menu, { desc = 'Advent of Code' })
     local ok, wk = pcall(require, 'which-key')
     if ok then
-      wk.add { { '<leader>a', group = '[A]dvent of Code' } }
+      wk.add { { '<leader>a', desc = 'Advent of Code' } }
     end
   end
 end

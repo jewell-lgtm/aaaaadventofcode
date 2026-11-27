@@ -3,51 +3,54 @@ if vim.g.loaded_aoc then
 end
 vim.g.loaded_aoc = true
 
-local function cmd(name, fn, opts)
-  vim.api.nvim_create_user_command(name, function(o)
-    fn(o.fargs, o)
-  end, vim.tbl_extend('force', { nargs = '*', desc = 'aoc: ' .. name }, opts or {}))
-end
-
+-- One command. `:Aoc` alone opens today / the current day; `:Aoc <sub>` for everything else.
+-- <leader>a opens the same actions as a picker.
 local aoc = function()
   return require 'aoc'
 end
 
-local subcommands = { 'read', 'code', 'next', 'test', 'run', 'submit', 'puzzle', 'examples', 'lang', 'status', 'verify', 'watch', 'gallery' }
+local subs = {
+  menu = function() aoc().menu() end,
+  test = function(a) aoc().test(a) end, -- :Aoc test [p1|p2]
+  run = function(a) aoc().run(a) end, -- real input
+  submit = function(a) aoc().submit(a) end,
+  read = function() aoc().read() end, -- tab 1: puzzle · example · input
+  code = function() aoc().code() end, -- tab 2: solution
+  exec = function() aoc().exec() end, -- tab 3: aoc watch terminal
+  mode = function() aoc().toggle() end, -- cycle read → code → exec
+  next = function(a) aoc().open(vim.list_extend({ 'next' }, a)) end,
+  puzzle = function(a) aoc().puzzle(a[1] == '-f') end, -- -f refetches (part 2)
+  examples = function() aoc().examples() end,
+  lang = function(a) aoc().lang(a) end, -- [id|repick]
+  watch = function() aoc().watch() end, -- toggle test on save
+  status = function(a) aoc().status(a) end,
+  verify = function(a) aoc().verify(a) end,
+  gallery = function(a) aoc().gallery(a) end,
+}
 
-cmd('Aoc', function(args)
-  local sub = args[1]
-  local rest = vim.list_slice(args, 2)
-  local m = aoc()
-  if sub == nil or sub:match '^%d' then return m.open(args) end
-  if sub == 'next' then return m.open(args) end
-  if sub == 'puzzle' then return m.puzzle(rest[1] == '-f') end
-  if sub == 'read' then return m.read() end
-  if sub == 'code' then return m.code() end
-  if sub == 'run' or sub == 'exec' then return m.exec() end
-  if sub == 'examples' then return m.examples() end
-  if sub == 'watch' then return m.watch() end
-  if m[sub] then return m[sub](rest) end
-  vim.notify('aoc: unknown subcommand ' .. sub, vim.log.levels.ERROR)
+vim.api.nvim_create_user_command('Aoc', function(o)
+  local sub, rest = o.fargs[1], vim.list_slice(o.fargs, 2)
+  if sub == nil or sub:match '^%d' then
+    return aoc().open(o.fargs) -- :Aoc · :Aoc 2017 3 · :Aoc 2026
+  end
+  if not subs[sub] then
+    return vim.notify('aoc: unknown subcommand ' .. sub .. ' (try :Aoc <Tab>)', vim.log.levels.ERROR)
+  end
+  subs[sub](rest)
 end, {
+  nargs = '*',
+  desc = 'Advent of Code',
   complete = function(lead, line)
-    if #vim.split(line, '%s+') > 2 then
-      return {}
+    local words = vim.split(line, '%s+')
+    if #words == 2 then
+      return vim.tbl_filter(function(s) return vim.startswith(s, lead) end, vim.tbl_keys(subs))
     end
-    return vim.tbl_filter(function(s) return vim.startswith(s, lead) end, subcommands)
+    if words[2] == 'lang' then
+      return vim.tbl_filter(function(s) return vim.startswith(s, lead) end, { 'repick', 'ts', 'python', 'rust', 'go', 'haskell', 'kotlin', 'ocaml', 'elixir' })
+    end
+    if vim.tbl_contains({ 'test', 'run', 'submit' }, words[2]) then
+      return { 'p1', 'p2' }
+    end
+    return {}
   end,
 })
-cmd('AocTest', function(a) aoc().test(a) end)
-cmd('AocRun', function(a) aoc().run(a) end)
-cmd('AocSubmit', function(a) aoc().submit(a) end)
-cmd('AocPuzzle', function(a) aoc().puzzle(a[1] == '-f') end)
-cmd('AocRead', function() aoc().read() end, { nargs = 0 })
-cmd('AocCode', function() aoc().code() end, { nargs = 0 })
-cmd('AocExec', function() aoc().exec() end, { nargs = 0 })
-cmd('AocMode', function() aoc().toggle() end, { nargs = 0 })
-cmd('AocNext', function(a) aoc().open(vim.list_extend({ 'next' }, a)) end)
-cmd('AocStatus', function(a) aoc().status(a) end)
-cmd('AocLang', function(a) aoc().lang(a) end, { complete = function() return { 'repick', 'ts', 'python', 'rust', 'go', 'haskell', 'kotlin' } end })
-cmd('AocWatch', function() aoc().watch() end, { nargs = 0 })
-cmd('AocGallery', function(a) aoc().gallery(a) end)
-cmd('AocVerify', function(a) aoc().verify(a) end)

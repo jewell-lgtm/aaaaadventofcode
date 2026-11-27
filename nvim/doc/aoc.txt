@@ -17,21 +17,25 @@ CONTENTS                                                         *aoc-contents*
 ==============================================================================
 1. WORKFLOW                                                      *aoc-workflow*
 
-  <leader>aa   open today's puzzle (or the day of the current buffer)
-               → fetches puzzle + input, JEV picks a language, scaffolds,
-                 and opens tabs in a fixed order (Tab / S-Tab, Ngt, or
-                 <leader>am to cycle read → code → run):
-                   1 read  puzzle.md │ example (examples.toml for inline
-                                     │ ones) over input.txt
-                   2 code  your partN solution, nothing else
-                   3 run   terminal running `aoc watch`: examples rerun on
-                           every save (<leader>ax opens it)
-                 A part you haven't started opens on the read tab.
-  <leader>at   test against the examples (float; failures → quickfix,
-               jumping to the example in examples.toml)
-  <leader>ar   run against your real input (answer copied to +)
-  <leader>as   submit (dry run first, then confirm)
-               ⭐ → part 2 text appears in puzzle.md, run <leader>at again
+Two entry points, nothing else to remember:
+
+  <leader>a    picker of every action (fuzzy: type "sub" ⏎ to submit)
+  :Aoc …       the same actions as subcommands, with <Tab> completion
+
+  :Aoc         open today's puzzle (or the day of the current buffer):
+               fetches puzzle + input, JEV picks a language, scaffolds,
+               and opens three tabs in a fixed order (Tab / S-Tab, Ngt):
+                 1 read  puzzle.md │ example (examples.toml for inline
+                                   │ ones) over input.txt
+                 2 code  your partN solution, nothing else
+                 3 exec  terminal running `aoc watch`: examples rerun on
+                         every save (opened on demand)
+               A part you haven't started opens on the read tab.
+  test         examples → float; failures → quickfix (:cnext jumps to the
+               failing [[example]])
+  run          real input (answer copied to +)
+  submit       dry run first, confirm, verdict. ⭐ → puzzle refetched,
+               read tab shows part 2
 
 Target resolution follows the buffer: inside solutions/2017/day03/… every
 command targets 2017 day 3. Elsewhere it's today (during the event), else the
@@ -39,37 +43,28 @@ last day you touched.
 
 ==============================================================================
 2. COMMANDS                                                      *aoc-commands*
-
-:Aoc [target]          Start/resume and open. `:Aoc 2017 3`, `:Aoc 2026`,
-                       `:Aoc next`.                                     *:Aoc*
-:Aoc {sub} [args]      Any subcommand below, e.g. `:Aoc test p2`.
-:AocTest [p1|p2]       Examples.                                    *:AocTest*
-:AocRun [p1|p2]        Real input.                                   *:AocRun*
-:AocSubmit [p1|p2]     Submit with confirmation.                  *:AocSubmit*
-:AocPuzzle [-f]        Reading tab; -f refetches the puzzle.      *:AocPuzzle*
-:AocRead / :AocCode    Reading / coding tab.                         *:AocRead*
-:AocExec               Run tab (`aoc watch` terminal).               *:AocExec*
-:AocMode               Cycle read → code → run.                      *:AocMode*
-:AocNext [year]        Newest released day you haven't started.     *:AocNext*
-:AocLang [id|repick]   Show / switch language / ask JEV again.      *:AocLang*
-:AocWatch              Toggle test-on-save.                        *:AocWatch*
-:AocStatus [year]      Star grid.                                 *:AocStatus*
-:AocVerify [year]      Rerun every solved part (regression).      *:AocVerify*
-:AocGallery [filter]   Browse the 32-language gallery.           *:AocGallery*
+                                                                         *:Aoc*
+:Aoc [target]          Start/resume and open. `:Aoc 2017 3`, `:Aoc 2026`.
+:Aoc menu              The <leader>a picker.
+:Aoc test [p1|p2]      Examples.
+:Aoc run [p1|p2]       Real input.
+:Aoc submit [p1|p2]    Submit with confirmation.
+:Aoc read|code|exec    Tab 1 / 2 / 3.
+:Aoc mode              Cycle read → code → exec.
+:Aoc next [year]       Newest released day you haven't started.
+:Aoc puzzle [-f]       Read tab; -f refetches the puzzle.
+:Aoc examples          examples.toml in a split.
+:Aoc lang [id|repick]  Show / switch language / ask JEV again.
+:Aoc watch             Toggle test-on-save.
+:Aoc status [year]     Star grid.
+:Aoc verify [year]     Rerun every solved part (regression).
+:Aoc gallery [filter]  Browse the 32-language machine gallery.
 
 ==============================================================================
 3. KEYMAPS                                                        *aoc-keymaps*
 
-  <leader>aa  open            <leader>am  toggle reading/coding
-  <leader>ap  read tab        <leader>ac  code tab
-  <leader>ax  run tab
-  <leader>an  next            <leader>ae  examples.toml
-  <leader>at  test            <leader>aw  toggle test on save
-  <leader>ar  run             <leader>al  re-pick language (JEV)
-  <leader>as  submit          <leader>ag  gallery
-  <leader>a*  stars
-
-Disable with `opts = { keys = false }`.
+Only <leader>a (the picker). Disable with `opts = { keys = false }` and map
+`require('aoc').menu` or any `:Aoc` subcommand yourself.
 
 ==============================================================================
 4. TARGETS                                                        *aoc-targets*
@@ -102,10 +97,10 @@ is true while testing.
 ==============================================================================
 6. GALLERY                                                        *aoc-gallery*
 
-machine-gallery/ has 10 classic puzzles solved in every bank language. `:AocGallery`
+machine-gallery/ has 10 classic puzzles solved in every bank language. `:Aoc gallery`
 opens a picker (snacks, else telescope, else vim.ui.select). <CR> opens part 1, <C-t> part 2, and <C-v> opens it
 in a vsplit so you can line up languages. Filter by language or title:
-`:AocGallery rust`, `:AocGallery chiton`.
+`:Aoc gallery rust`, `:Aoc gallery chiton`.
 
 ==============================================================================
 7. SETUP                                                            *aoc-setup*
