@@ -1,0 +1,66 @@
+# Examples for `aoc test`. Edit freely: fix expected values, add args, add more [[example]] blocks.
+[[example]]
+text = """(())"""
+part1 = "0"
+part2 = ""
+auto = true
+
+[[example]]
+text = """()()"""
+part1 = "0"
+part2 = ""
+auto = true
+
+[[example]]
+text = """((("""
+part1 = "3"
+part2 = ""
+auto = true
+
+[[example]]
+text = """(()(()("""
+part1 = "3"
+part2 = ""
+auto = true
+
+[[example]]
+text = """))((((("""
+part1 = "3"
+part2 = ""
+auto = true
+
+[[example]]
+text = """())"""
+part1 = "-1"
+part2 = ""
+auto = true
+
+[[example]]
+text = """))("""
+part1 = "-1"
+part2 = ""
+auto = true
+
+[[example]]
+text = """)))"""
+part1 = "-3"
+part2 = ""
+auto = true
+
+[[example]]
+text = """)())())"""
+part1 = "-3"
+part2 = ""
+auto = true
+
+[[example]]
+text = """)"""
+part1 = ""
+part2 = "1"
+auto = true
+
+[[example]]
+text = """()())"""
+part1 = ""
+part2 = "5"
+auto = true
