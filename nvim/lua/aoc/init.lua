@@ -364,7 +364,15 @@ function M.submit(fargs)
             -- Part 2 is unlocked: refetch, re-read info (part, solution file), show the puzzle.
             M.cli({ 'info' }, function(info)
               state.info = info
+              local code = state.tabs.code
+              if valid(code) then
+                local win = vim.api.nvim_tabpage_get_win(code)
+                vim.api.nvim_win_call(win, function()
+                  vim.cmd.edit(esc(info.solution['2']))
+                end)
+              end
               M.puzzle(true)
+              notify 'Part 2 unlocked: read tab updated, part2 starts as a copy of part 1'
             end)
           end
         end
@@ -595,7 +603,16 @@ function M.setup(opts)
     group = group,
     callback = function()
       local t, tabs = vim.api.nvim_get_current_tabpage(), state.tabs
-      state.mode = t == tabs.read and 'read' or t == tabs.code and 'code' or t == tabs.exec and 'exec' or state.mode
+      if t == tabs.read then
+        state.mode = 'read'
+        vim.cmd 'checktime'
+      elseif t == tabs.code then
+        M.code() -- switches to part 2's file once part 1 is solved
+      elseif t == tabs.exec and tabs.exec_part ~= (state.info and state.info.part) then
+        M.exec() -- restart the watcher for the new part
+      elseif t == tabs.exec then
+        state.mode = 'exec'
+      end
     end,
   })
   vim.api.nvim_create_autocmd('BufReadPost', {

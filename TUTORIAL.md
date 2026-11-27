@@ -68,6 +68,8 @@ aoc puzzle          # read part 2 (aoc puzzle -f refetches)
 aoc test            # the part now defaults to 2
 ```
 
+Your `part2` file already holds a copy of part 1 (with `Part1` → `Part2` renamed for Haskell-style modules and Java-style classes), so you start from working code rather than an empty stub. That happens whenever the day is on part 2 and `part2` is still untouched.
+
 If the part 2 example wasn't extracted (or its value is wrong), fix it in `examples.toml`, or add one:
 
 ```bash

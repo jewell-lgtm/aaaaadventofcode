@@ -2,6 +2,12 @@ from aoc import arg, example
 
 
 def solve(input: str) -> int | str:
-    lines = input.rstrip("\n").split("\n")
+    chars = [char for char in input.strip()]
 
-    return 0
+    floor = 0
+    for char in chars:
+        if floor < 0:
+            return floor
+        floor += 1 if char == "(" else -1
+
+    return floor

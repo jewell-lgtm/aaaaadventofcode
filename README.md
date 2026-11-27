@@ -34,7 +34,7 @@ cp .env.example .env             # AOC_SESSION=<session cookie from adventofcode
 aoc            # today: fetch puzzle+input, JEV picks a language, scaffold, run examples
 aoc test       # examples for the current part        (aoc test p2)
 aoc run        # real input
-aoc submit     # run + submit + record verdict; on ⭐, fetch part 2 and commit
+aoc submit     # run + submit + record verdict; on ⭐, fetch part 2, copy part 1 → part 2, commit
 ```
 
 Inside nvim: `<leader>a` opens a picker of every action; `:Aoc <sub>` does the same (`:help aoc`).

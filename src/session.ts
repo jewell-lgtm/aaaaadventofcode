@@ -2,7 +2,7 @@ import type { Args } from "./args";
 import { fallbackPick, jevPick, type Pick } from "./jev";
 import { getLang, langOverride, type Lang } from "./langs";
 import { runner, type Runner } from "./runner";
-import { langDir, scaffold } from "./scaffold";
+import { carryPart1, langDir, scaffold } from "./scaffold";
 import { currentPart, loadDay, saveDay, type DayState, type Part, type Target } from "./store";
 import { c, say } from "./ui";
 
@@ -47,6 +47,10 @@ export async function session(t: Target, args: Args): Promise<Session> {
   const { dir, created } = scaffold(t, lang);
   if (created) say(c.green(`✦ scaffolded ${lang.name} → ${dir}`));
   const part = args.part ?? currentPart(state);
+  // On part 2 with an untouched part 2 file: start from your part 1 solution.
+  if (part === 2 && state.parts[1].answer !== undefined && carryPart1(t, lang)) {
+    say(c.green(`✦ copied part 1 → ${lang.solution[2]} to start part 2`));
+  }
   return { t, state, lang, part, dir: langDir(t, lang) };
 }
 
