@@ -17,7 +17,8 @@ solutions/**/expected*.txt
 .DS_Store
 .aoc-last
 
-.claude
+.claude/*
+!.claude/skills/
 
 # aoc v2
 .aoc/
