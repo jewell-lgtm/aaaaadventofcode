@@ -1,0 +1,16 @@
+{
+  "year": 2015,
+  "day": 2,
+  "parts": {
+    "1": {
+      "submissions": []
+    },
+    "2": {
+      "submissions": []
+    }
+  },
+  "startedAt": "2026-11-27T10:39:23.047Z",
+  "title": "I Was Told There Would Be No Math",
+  "langReason": "JEV pick (confidence 0.19; skipped recent: python)",
+  "lang": "ruby"
+}

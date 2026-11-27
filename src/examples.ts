@@ -47,8 +47,25 @@ function inlineTable(o: Record<string, unknown>): string {
   return `{ ${Object.entries(o).map(([k, v]) => `${/^[A-Za-z0-9_-]+$/.test(k) ? k : str(k)} = ${typeof v === "string" ? str(v) : JSON.stringify(v)}`).join(", ")} }`;
 }
 
+/** Top of every examples.toml: what an entry looks like, since you'll be adding/fixing them by hand. */
+export const EXAMPLES_HEADER = `# Tests for \`:Aoc test\`. Filled from the puzzle text; edit freely, aoc never overwrites your values.
+#
+# One [[example]] block per test. Every field:
+#
+# [[example]]
+# input = "examples/3.txt"          # input from a file (path relative to this day dir)
+# text = """1,2,3"""                # …or inline instead of \`input\` (good for one-liners)
+# part1 = "6"                       # expected answer for part 1 ("" = don't check part 1)
+# part2 = "36"                      # expected answer for part 2 ("" = don't check part 2)
+# args = { size = 7, steps = 12 }   # constants that differ in the example: read with arg("size", 71)
+# auto = false                      # true = extracted by aoc; set false once you've checked it
+#
+# Add one from the clipboard instead:  pbpaste | aoc ex add p2 36
+
+`;
+
 export function serializeExamples(examples: Example[]): string {
-  const head = "# Examples for `aoc test`. Edit freely: fix expected values, add args, add more [[example]] blocks.\n";
+  const head = EXAMPLES_HEADER;
   return (
     head +
     examples
