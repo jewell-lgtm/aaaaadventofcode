@@ -1,0 +1,54 @@
+# Examples for `aoc test`. Edit freely: fix expected values, add args, add more [[example]] blocks.
+[[example]]
+text = """1122"""
+part1 = "3"
+part2 = ""
+auto = true
+
+[[example]]
+text = """1111"""
+part1 = "4"
+part2 = ""
+auto = true
+
+[[example]]
+text = """1234"""
+part1 = "0"
+part2 = ""
+auto = true
+
+[[example]]
+text = """91212129"""
+part1 = "9"
+part2 = ""
+auto = true
+
+[[example]]
+text = """1212"""
+part1 = ""
+part2 = "6"
+auto = true
+
+[[example]]
+text = """1221"""
+part1 = ""
+part2 = "0"
+auto = true
+
+[[example]]
+text = """123425"""
+part1 = ""
+part2 = "4"
+auto = true
+
+[[example]]
+text = """123123"""
+part1 = ""
+part2 = "12"
+auto = true
+
+[[example]]
+text = """12131415"""
+part1 = ""
+part2 = "4"
+auto = true
