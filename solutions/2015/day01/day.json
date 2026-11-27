@@ -14,7 +14,15 @@
       "solvedAt": "2026-11-27T10:37:05.479Z"
     },
     "2": {
-      "submissions": []
+      "submissions": [
+        {
+          "answer": "1783",
+          "verdict": "correct",
+          "at": "2026-11-27T11:16:41.922Z"
+        }
+      ],
+      "answer": "1783",
+      "solvedAt": "2026-11-27T11:16:41.922Z"
     }
   },
   "startedAt": "2026-11-27T09:51:57.457Z",

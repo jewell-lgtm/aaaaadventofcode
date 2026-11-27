@@ -4,10 +4,13 @@ from aoc import arg, example
 def solve(input: str) -> int | str:
     chars = [char for char in input.strip()]
 
+    i = 0
     floor = 0
     for char in chars:
-        if floor < 0:
-            return floor
+        i += 1
         floor += 1 if char == "(" else -1
 
-    return floor
+        if floor < 0:
+            return i
+
+    raise ValueError("No floor found")
