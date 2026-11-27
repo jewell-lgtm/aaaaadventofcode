@@ -19,7 +19,11 @@ CONTENTS                                                         *aoc-contents*
 
   <leader>aa   open today's puzzle (or the day of the current buffer)
                → fetches puzzle + input, JEV picks a language, scaffolds,
-                 opens partN in that language with puzzle.md beside it
+                 and opens two tabs (Tab / S-Tab or <leader>am to switch):
+                   coding tab   your partN solution, nothing else
+                   reading tab  puzzle.md │ example (examples.toml for
+                                          │ inline ones) over input.txt
+                 A part you haven't started opens on the reading tab.
   <leader>at   test against the examples (float; failures → quickfix,
                jumping to the example in examples.toml)
   <leader>ar   run against your real input (answer copied to +)
@@ -39,7 +43,9 @@ last day you touched.
 :AocTest [p1|p2]       Examples.                                    *:AocTest*
 :AocRun [p1|p2]        Real input.                                   *:AocRun*
 :AocSubmit [p1|p2]     Submit with confirmation.                  *:AocSubmit*
-:AocPuzzle [-f]        puzzle.md in a vsplit; -f refetches.       *:AocPuzzle*
+:AocPuzzle [-f]        Reading tab; -f refetches the puzzle.      *:AocPuzzle*
+:AocRead / :AocCode    Reading / coding tab.                         *:AocRead*
+:AocMode               Toggle between them.                          *:AocMode*
 :AocNext [year]        Newest released day you haven't started.     *:AocNext*
 :AocLang [id|repick]   Show / switch language / ask JEV again.      *:AocLang*
 :AocWatch              Toggle test-on-save.                        *:AocWatch*
@@ -50,7 +56,8 @@ last day you touched.
 ==============================================================================
 3. KEYMAPS                                                        *aoc-keymaps*
 
-  <leader>aa  open            <leader>ap  puzzle
+  <leader>aa  open            <leader>am  toggle reading/coding
+  <leader>ap  reading tab     <leader>ac  coding tab
   <leader>an  next            <leader>ae  examples.toml
   <leader>at  test            <leader>aw  toggle test on save
   <leader>ar  run             <leader>al  re-pick language (JEV)
@@ -99,7 +106,7 @@ in a vsplit so you can line up languages. Filter by language or title:
 7. SETUP                                                            *aoc-setup*
 >lua
   { dir = '~/Code/jewell-lgtm/aaaaadventofcode/nvim', name = 'aoc',
-    opts = { test_on_save = false, open_puzzle = true, quiet_pass = false } }
+    opts = { test_on_save = false, open_mode = "auto", quiet_pass = false } }
 <
 Statusline (mini.statusline): add `require('aoc').status_component()` to a
 section, which shows `2026·d03·rust ★☆` inside a day dir.

@@ -6,11 +6,13 @@ M.config = {
   cmd = 'aoc',
   root = vim.fn.expand '~/Code/jewell-lgtm/aaaaadventofcode',
   test_on_save = false, -- toggle with :AocWatch
-  open_puzzle = true, -- :Aoc opens puzzle.md in a vsplit next to the solution
+  -- :Aoc opens the reading tab for a part you haven't started, the coding tab once you have.
+  -- 'auto' | 'read' | 'code'
+  open_mode = 'auto',
   keys = true,
 }
 
-local state = { info = nil, running = false, watch = false }
+local state = { info = nil, running = false, watch = false, tabs = {}, tabkey = nil, mode = nil }
 
 -- ── helpers ────────────────────────────────────────────────────────────────
 
@@ -125,14 +127,118 @@ local function target_args(fargs)
   return fargs or {}
 end
 
---- :Aoc [target]: start/resume a day, open its solution (and puzzle).
+-- ── modes: a reading tab (puzzle │ example / input) and a coding tab (solution) ──
+
+local esc = vim.fn.fnameescape
+
+local function valid(tab)
+  return tab and vim.api.nvim_tabpage_is_valid(tab)
+end
+
+local function read_only(opts)
+  vim.bo.readonly = true
+  vim.bo.modifiable = false
+  vim.wo.wrap = opts.wrap
+  vim.wo.linebreak = opts.wrap
+end
+
+--- Tabs belong to one day; opening another day starts fresh ones.
+local function day_tabs(info)
+  local key = info.year .. '/' .. info.day
+  if state.tabkey ~= key then
+    state.tabs, state.tabkey = {}, key
+  end
+  return state.tabs
+end
+
+--- Tiled (non-floating) windows of a tab: incline labels, notifications etc. are floats.
+local function tiled(tab)
+  return vim.tbl_filter(function(w)
+    return vim.api.nvim_win_get_config(w).relative == ''
+  end, vim.api.nvim_tabpage_list_wins(tab))
+end
+
+--- The current tab can host the coding layout if it's a fresh nvim: one empty buffer or a dashboard.
+local function reusable_tab()
+  local wins = tiled(0)
+  local buf = wins[1] and vim.api.nvim_win_get_buf(wins[1])
+  if #wins ~= 1 or vim.bo[buf].modified then
+    return false
+  end
+  return vim.api.nvim_buf_get_name(buf) == '' or vim.bo[buf].filetype:match 'dashboard' ~= nil
+end
+
+--- Reading mode: puzzle on the left; example above the real input on the right.
+function M.read()
+  local info = state.info
+  if not info then
+    return M.open {}
+  end
+  local tabs = day_tabs(info)
+  state.mode = 'read'
+  if valid(tabs.read) then
+    vim.api.nvim_set_current_tabpage(tabs.read)
+    vim.cmd 'checktime' -- puzzle.md gains part 2 after you solve part 1
+    return
+  end
+  vim.cmd('tabnew ' .. esc(info.puzzle))
+  tabs.read = vim.api.nvim_get_current_tabpage()
+  local puzzle = vim.api.nvim_get_current_win()
+  read_only { wrap = true }
+  -- Inline examples (e.g. 2015 day 1) only exist in examples.toml, so fall back to that.
+  vim.cmd('botright vsplit ' .. esc(info.exampleFile or info.examples))
+  if vim.fn.filereadable(info.input) == 1 then
+    vim.cmd('belowright split ' .. esc(info.input))
+    read_only { wrap = false }
+  end
+  vim.api.nvim_set_current_win(puzzle)
+end
+
+--- Coding mode: just the solution for the current part.
+function M.code()
+  local info = state.info
+  if not info then
+    return M.open {}
+  end
+  local tabs = day_tabs(info)
+  local file = info.solution[tostring(info.part)]
+  state.mode = 'code'
+  if valid(tabs.code) then
+    vim.api.nvim_set_current_tabpage(tabs.code)
+  elseif reusable_tab() and not (valid(tabs.read) and vim.api.nvim_get_current_tabpage() == tabs.read) then
+    tabs.code = vim.api.nvim_get_current_tabpage()
+  else
+    vim.cmd 'tabnew'
+    tabs.code = vim.api.nvim_get_current_tabpage()
+  end
+  if vim.api.nvim_buf_get_name(0) ~= file then
+    vim.cmd.edit(esc(file))
+  end
+end
+
+function M.toggle()
+  if state.mode == 'read' then M.code() else M.read() end
+end
+
+--- Untouched template = you haven't started this part.
+local function started(info)
+  local p = tostring(info.part)
+  local ok1, mine = pcall(vim.fn.readfile, info.solution[p])
+  local ok2, tmpl = pcall(vim.fn.readfile, info.template[p])
+  return not (ok1 and ok2) or table.concat(mine, '\n') ~= table.concat(tmpl, '\n')
+end
+
+--- :Aoc [target]: start/resume a day. Coding tab first (Tab/S-Tab switch), reading tab on top if you haven't started.
 function M.open(fargs)
-  local args = vim.list_extend({ 'info' }, target_args(fargs))
-  M.cli(args, function(info)
+  M.cli(vim.list_extend({ 'info' }, fargs or {}), function(info)
     state.info = info
-    vim.cmd.edit(vim.fn.fnameescape(info.solution[tostring(info.part)]))
-    if M.config.open_puzzle and vim.fn.filereadable(info.puzzle) == 1 then
-      M.puzzle(true)
+    local mode = M.config.open_mode
+    if mode == 'auto' then
+      mode = started(info) and 'code' or 'read'
+    end
+    M.code()
+    if mode == 'read' then
+      M.read()
     end
     notify(('%d day %d%s · part %d · %s%s'):format(info.year, info.day, info.title and (': ' .. info.title) or '', info.part, info.langName, info.langReason and ('\n' .. info.langReason) or ''))
   end)
@@ -220,7 +326,11 @@ function M.submit(fargs)
         if s.verdict == 'correct' then
           M.refresh()
           if s.part == 1 then
-            M.puzzle(true, true)
+            -- Part 2 is unlocked: refetch, re-read info (part, solution file), show the puzzle.
+            M.cli({ 'info' }, function(info)
+              state.info = info
+              M.puzzle(true)
+            end)
           end
         end
       end)
@@ -228,27 +338,13 @@ function M.submit(fargs)
   end)
 end
 
---- puzzle.md in a vsplit (reused if already open). `refresh` refetches (part 2 after solving).
-function M.puzzle(keep_focus, refresh)
-  M.cli(refresh and { 'puzzle', '-f' } or { 'puzzle' }, function(p)
-    local from = vim.api.nvim_get_current_win()
-    for _, win in ipairs(vim.api.nvim_list_wins()) do
-      if vim.api.nvim_buf_get_name(vim.api.nvim_win_get_buf(win)) == p.file then
-        vim.api.nvim_set_current_win(win)
-        vim.cmd 'edit!'
-        if keep_focus then
-          vim.api.nvim_set_current_win(from)
-        end
-        return
-      end
-    end
-    vim.cmd('botright vsplit ' .. vim.fn.fnameescape(p.file))
-    vim.bo.readonly = true
-    vim.wo.wrap = true
-    vim.wo.linebreak = true
-    if keep_focus then
-      vim.api.nvim_set_current_win(from)
-    end
+--- Reading mode, optionally refetching the puzzle first (part 2 after solving part 1).
+function M.puzzle(refresh)
+  if not refresh and state.info then
+    return M.read()
+  end
+  M.cli(refresh and { 'puzzle', '-f' } or { 'puzzle' }, function()
+    M.read()
   end)
 end
 
@@ -459,7 +555,9 @@ function M.setup(opts)
     map('<leader>at', function() M.test {} end, '[A]oC: [t]est examples')
     map('<leader>ar', function() M.run {} end, '[A]oC: [r]un real input')
     map('<leader>as', function() M.submit {} end, '[A]oC: [s]ubmit')
-    map('<leader>ap', function() M.puzzle(false) end, '[A]oC: [p]uzzle')
+    map('<leader>am', M.toggle, '[A]oC: toggle reading/coding [m]ode')
+    map('<leader>ap', function() M.read() end, '[A]oC: [p]uzzle (reading mode)')
+    map('<leader>ac', function() M.code() end, '[A]oC: [c]oding mode')
     map('<leader>ae', M.examples, '[A]oC: [e]xamples.toml')
     map('<leader>aw', M.watch, '[A]oC: toggle test on save ([w]atch)')
     map('<leader>al', function() M.lang { 'repick' } end, '[A]oC: re-pick [l]anguage')
