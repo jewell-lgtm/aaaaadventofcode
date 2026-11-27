@@ -142,11 +142,26 @@ local function read_only(opts)
   vim.wo.linebreak = opts.wrap
 end
 
---- Tabs belong to one day; opening another day starts fresh ones.
+--- Tabs belong to one day. Switching days closes the old read/exec tabs and reuses the code tab,
+--- so there are always just three.
 local function day_tabs(info)
   local key = info.year .. '/' .. info.day
   if state.tabkey ~= key then
-    state.tabs, state.tabkey = {}, key
+    local old = state.tabs
+    if valid(old.exec) then
+      -- stop the watcher; deleting its terminal buffer closes the tab
+      for _, win in ipairs(vim.api.nvim_tabpage_list_wins(old.exec)) do
+        local buf = vim.api.nvim_win_get_buf(win)
+        if vim.bo[buf].buftype == 'terminal' then
+          pcall(vim.fn.jobstop, vim.b[buf].terminal_job_id)
+          pcall(vim.api.nvim_buf_delete, buf, { force = true })
+        end
+      end
+    end
+    if valid(old.read) and #vim.api.nvim_list_tabpages() > 1 then
+      vim.cmd.tabclose(vim.api.nvim_tabpage_get_number(old.read))
+    end
+    state.tabs, state.tabkey = { code = valid(old.code) and old.code or nil }, key
   end
   return state.tabs
 end
